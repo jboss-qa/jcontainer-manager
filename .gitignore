@@ -1,0 +1,32 @@
+*~
+lib/
+bin/
+build/
+
+# Maven
+log/
+target/
+/*.properties
+
+# Eclipse workspace
+.classpath
+.project
+.settings/
+.metadata
+/RemoteSystemsTempFiles
+.xml/
+
+# IntelliJ IDEA workspace
+*.ipr
+*.iml
+*.iws
+.idea/
+/test-output
+
+# NetBeans workspace
+.nb-gradle
+
+# OS-specific files
+.DS_Store
+Icon*i
+.attach_pid*
