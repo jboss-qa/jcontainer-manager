@@ -3,6 +3,9 @@ lib/
 bin/
 build/
 
+# Project files
+/src/test/resources/test.properties
+
 # Maven
 log/
 target/

@@ -79,7 +79,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>${project.artifactId}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -110,6 +109,31 @@
 						<version>1.0.0</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.17</version>
+				<configuration>
+					<systemProperties>
+						<property>
+							<name>jboss.home</name>
+							<value>${jboss.home}</value>
+						</property>
+						<property>
+							<name>eap.home</name>
+							<value>${eap.home}</value>
+						</property>
+						<property>
+							<name>karaf.home</name>
+							<value>${karaf.home}</value>
+						</property>
+						<property>
+							<name>fuse.home</name>
+							<value>${fuse.home}</value>
+						</property>
+					</systemProperties>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

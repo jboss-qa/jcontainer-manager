@@ -25,26 +25,25 @@ import java.util.Properties;
 
 public abstract class ContainerTest {
 
-	public static final String JBOSS_HOME = getProperty("jboss.home");
-	public static final String EAP_HOME = getProperty("eap.home");
-	public static final String KARAF_HOME = getProperty("karaf.home");
-	public static final String FUSE_HOME = getProperty("fuse.home");
 	private static final Logger logger = LoggerFactory.getLogger(ContainerTest.class);
+	private static final Properties props = new Properties();
 
-	public static String getProperty(String key) {
+	static {
 		final String testPropertiesFile = "src/test/resources/test.properties";
-		String value = null;
-		final Properties props = new Properties();
 		try (InputStream is = new FileInputStream(testPropertiesFile)) {
 			props.load(is);
 		} catch (IOException e) {
 			logger.warn("File {} does not exist", testPropertiesFile);
 		}
-		if (props.get(key) != null) {
-			value = (String) props.get(key);
-		} else if (System.getProperty(key) != null) {
-			value = System.getProperty(key);
-		}
-		return value;
+	}
+
+	public static final String JBOSS_HOME = getProperty("jboss.home");
+	public static final String EAP_HOME = getProperty("eap.home");
+	public static final String KARAF_HOME = getProperty("karaf.home");
+	public static final String FUSE_HOME = getProperty("fuse.home");
+
+	public static String getProperty(String key) {
+		final String value = System.getProperty(key);
+		return value != null && !value.isEmpty() ? value : (String) props.get(key);
 	}
 }
