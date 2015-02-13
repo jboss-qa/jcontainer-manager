@@ -22,3 +22,20 @@ try (Container cont = new FuseContainer<>(conf)) {
 	}
 }
 ```
+
+## Tests
+
+You will need to set some properties:
+
+ - jboss.home
+ - eap.home
+ - karaf.home
+ - fuse.home
+
+You can set them by system property (`-Djboss.home` etc.) or create own copy of `test.properties_template` and set values:
+
+    cp src/test/resources/test.properties_template src/test/resources/test.properties
+
+### Running tests:
+
+    mvn clean test -DskipTests=false
