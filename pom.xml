@@ -145,4 +145,11 @@
 		</pluginRepository>
 	</pluginRepositories>
 
+	<distributionManagement>
+		<repository>
+			<id>bintray-jboss-soa-qa-maven-jcontainer-manager</id>
+			<name>jboss-soa-qa-maven-jcontainer-manager</name>
+			<url>https://api.bintray.com/maven/jboss-soa-qa/maven/jcontainer-manager</url>
+		</repository>
+	</distributionManagement>
 </project>
