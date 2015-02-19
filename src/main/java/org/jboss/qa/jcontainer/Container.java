@@ -62,12 +62,12 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		logger.debug("Process arguments: " + cmd.toString());
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
 		final Process process = processBuilder.start();
-		int attempts = 10;
+		int attempts = 30;
 		while (!checkSocket()) {
 			if (--attempts <= 0) {
 				throw new IllegalStateException("Container was not started");
 			}
-			Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+			Thread.sleep(TimeUnit.SECONDS.toMillis(5));
 			logger.info("Waiting for container...");
 		}
 		logger.info("Container was started");
