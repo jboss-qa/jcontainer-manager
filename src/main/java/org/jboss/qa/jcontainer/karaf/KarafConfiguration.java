@@ -48,17 +48,14 @@ public class KarafConfiguration extends Configuration {
 			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
 		}
 		final List<String> cmd = new ArrayList<>();
-		if (OSDetector.isUnix()) {
-			cmd.add("/bin/bash");
-			cmd.add(script.getAbsolutePath());
-		} else if (OSDetector.isWindows()) {
+		if (OSDetector.isWindows()) {
 			// TODO(mbasovni): Not yet tested!
 			cmd.add("cmd");
 			cmd.add("/c");
 			cmd.add(script.getAbsolutePath());
 		} else {
-			throw new UnsupportedOperationException(String.format("Operation system '%s' is not yer supported",
-					OSDetector.OS));
+			cmd.add("/bin/bash");
+			cmd.add(script.getAbsolutePath());
 		}
 		return cmd;
 	}
