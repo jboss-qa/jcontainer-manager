@@ -13,35 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.eap;
+package org.jboss.qa.jcontainer.util;
 
-import org.jboss.qa.jcontainer.jboss.JBossConfiguration;
+public final class OSDetector {
 
-public class EapConfiguration extends JBossConfiguration {
-	public EapConfiguration(Builder<?> builder) {
-		super(builder);
+	public static final String OS = System.getProperty("os.name").toLowerCase();
+
+	private OSDetector() {
 	}
 
-	public static Builder<?> builder() {
-		return new Builder2();
+	public static boolean isWindows() {
+		return (OS.indexOf("win") >= 0);
 	}
 
-	public abstract static class Builder<T extends Builder<T>> extends JBossConfiguration.Builder<T> {
-
-		public Builder() {
-			managementPort = 9999;
-		}
-
-		public EapConfiguration build() {
-			super.build();
-			return new EapConfiguration(this);
-		}
+	public static boolean isMac() {
+		return (OS.indexOf("mac") >= 0);
 	}
 
-	private static class Builder2 extends Builder<Builder2> {
-		@Override
-		protected Builder2 self() {
-			return this;
-		}
+	public static boolean isUnix() {
+		return (OS.indexOf("nix") >= 0 || OS.indexOf("nux") >= 0 || OS.indexOf("aix") > 0);
+	}
+
+	public static boolean isSolaris() {
+		return (OS.indexOf("sunos") >= 0);
 	}
 }

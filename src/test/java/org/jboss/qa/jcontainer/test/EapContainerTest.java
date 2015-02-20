@@ -37,7 +37,7 @@ public class EapContainerTest extends ContainerTest {
 
 	@BeforeClass
 	public static void before() throws Exception {
-		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).build();
+		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).xmx("2g").build();
 		container = new EapContainer<>(conf);
 		final EapUser user = new EapUser();
 		user.setUsername("admin");

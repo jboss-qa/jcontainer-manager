@@ -17,9 +17,11 @@ package org.jboss.qa.jcontainer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class Configuration {
+public abstract class Configuration {
 
 	protected final File directory;
 	protected final String host;
@@ -30,6 +32,7 @@ public class Configuration {
 	protected final String xmx;
 	protected final String maxPermSize;
 	protected final List<String> params;
+	protected final Map<String, String> envProps;
 
 	protected Configuration(Builder<?> builder) {
 		// Mandatory properties
@@ -44,6 +47,7 @@ public class Configuration {
 		xmx = builder.xmx;
 		maxPermSize = builder.maxPermSize;
 		params = builder.params;
+		envProps = builder.envProps;
 	}
 
 	protected void checkMandatoryProperty(String name, Object value) {
@@ -88,32 +92,11 @@ public class Configuration {
 		return params;
 	}
 
-	public List<String> generateCommand() {
-		final List<String> cmd = new ArrayList<>();
-
-		// Add binary java file
-		if (System.getProperty("java.home") == null) {
-			throw new IllegalStateException("System property 'java.home' is not set");
-		}
-		final File javaHome = new File(System.getProperty("java.home"));
-		final String javaExec = javaHome + File.separator + "bin" + File.separator + "java";
-		cmd.add(javaExec);
-
-		// Add optional properties
-		if (xms != null) {
-			cmd.add("-Xms" + xms);
-		}
-		if (xmx != null) {
-			cmd.add("-Xmx" + xmx);
-		}
-		if (maxPermSize != null) {
-			cmd.add("-XX:MaxPermSize=" + maxPermSize);
-		}
-		if (params != null) {
-			cmd.addAll(params);
-		}
-		return cmd;
+	public Map<String, String> getEnvProps() {
+		return envProps;
 	}
+
+	public abstract List<String> generateCommand();
 
 	public abstract static class Builder<T extends Builder<T>> {
 
@@ -126,6 +109,7 @@ public class Configuration {
 		protected String xmx;
 		protected String maxPermSize;
 		protected List<String> params;
+		protected Map<String, String> envProps;
 
 		public Builder() {
 			host = "localhost";
@@ -136,6 +120,7 @@ public class Configuration {
 			xmx = "256m";
 			maxPermSize = "512m";
 			params = new ArrayList<>();
+			envProps = new HashMap<>();
 		}
 
 		protected abstract T self();
@@ -187,6 +172,16 @@ public class Configuration {
 
 		public T param(String param) {
 			this.params.add(param);
+			return self();
+		}
+
+		public T envProps(Map<String, String> envProps) {
+			this.envProps.putAll(envProps);
+			return self();
+		}
+
+		public T envProp(String key, String value) {
+			this.envProps.put(key, value);
 			return self();
 		}
 	}

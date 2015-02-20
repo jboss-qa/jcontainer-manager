@@ -16,16 +16,20 @@
 package org.jboss.qa.jcontainer.karaf;
 
 import org.jboss.qa.jcontainer.Configuration;
+import org.jboss.qa.jcontainer.util.OSDetector;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class KarafConfiguration extends Configuration {
 
 	protected final File keyFile;
+	protected final File script;
 
 	protected KarafConfiguration(Builder<?> builder) {
 		super(builder);
+		script = builder.script;
 		//Optional
 		keyFile = builder.keyFile;
 	}
@@ -38,41 +42,35 @@ public class KarafConfiguration extends Configuration {
 		return keyFile;
 	}
 
+	@Override
 	public List<String> generateCommand() {
-		final List<String> cmd = super.generateCommand();
-
-		cmd.add("-server");
-		cmd.add("-XX:+UnlockDiagnosticVMOptions");
-		cmd.add("-XX:+UnsyncloadClass");
-		cmd.add("-Dcom.sun.management.jmxremote");
-		cmd.add("-Djava.endorsed.dirs=" + System.getProperty("java.endorsed.dirs") + File.pathSeparator + directory
-				+ File.separator + "lib" + File.separator + "endorsed");
-		cmd.add("-Djava.ext.dirs=" + System.getProperty("java.ext.dirs") + File.pathSeparator + directory
-				+ File.separator + "lib" + File.separator + "ext");
-		cmd.add("-Dkaraf.instances=" + directory + File.separator + "instances");
-		cmd.add("-Dkaraf.home=" + directory);
-		cmd.add("-Dkaraf.base=" + directory);
-		cmd.add("-Dkaraf.etc=" + directory + File.separator + "etc");
-		cmd.add("-Djava.io.tmpdir=" + directory + File.separator + "data" + File.separator + "tmp");
-		cmd.add("-Djava.util.logging.config.file=" + directory + File.separator + "etc" + File.separator
-				+ "java.util.logging.properties");
-		cmd.add("-Dkaraf.startLocalConsole=true");
-		cmd.add("-Dkaraf.startRemoteShell=true");
-		cmd.add("-classpath");
-		cmd.add(directory + File.separator + "lib" + File.separator + "karaf-jaas-boot.jar" + File.pathSeparator
-				+ directory + File.separator + "lib" + File.separator + "karaf.jar");
-		cmd.add("org.apache.karaf.main.Main");
-
+		if (!script.exists()) {
+			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
+		}
+		final List<String> cmd = new ArrayList<>();
+		if (OSDetector.isUnix()) {
+			cmd.add("/bin/bash");
+			cmd.add(script.getAbsolutePath());
+		} else if (OSDetector.isWindows()) {
+			// TODO(mbasovni): Not yet tested!
+			cmd.add("cmd");
+			cmd.add("/c");
+			cmd.add(script.getAbsolutePath());
+		} else {
+			throw new UnsupportedOperationException(String.format("Operation system '%s' is not yer supported",
+					OSDetector.OS));
+		}
 		return cmd;
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
 		protected File keyFile;
+		protected File script;
 
 		public Builder() {
-			this.port = 8101;
-			this.username = "karaf";
-			this.password = "karaf";
+			port = 8101;
+			username = "karaf";
+			password = "karaf";
 		}
 
 		public T keyFile(String keyFile) {
@@ -81,6 +79,7 @@ public class KarafConfiguration extends Configuration {
 		}
 
 		public KarafConfiguration build() {
+			script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "karaf.bat" : "karaf"));
 			return new KarafConfiguration(this);
 		}
 	}
