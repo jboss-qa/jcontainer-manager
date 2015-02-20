@@ -36,7 +36,7 @@ public class FuseContainerTest extends ContainerTest {
 
 	@BeforeClass
 	public static void before() throws Exception {
-		final FuseConfiguration conf = FuseConfiguration.builder().directory(FUSE_HOME).build();
+		final FuseConfiguration conf = FuseConfiguration.builder().directory(FUSE_HOME).xmx("2g").build();
 		container = new FuseContainer<>(conf);
 		final FuseUser user = new FuseUser();
 		user.setUsername("admin");

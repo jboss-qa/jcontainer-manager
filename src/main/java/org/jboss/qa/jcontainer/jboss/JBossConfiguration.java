@@ -16,8 +16,10 @@
 package org.jboss.qa.jcontainer.jboss;
 
 import org.jboss.qa.jcontainer.Configuration;
+import org.jboss.qa.jcontainer.util.OSDetector;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class JBossConfiguration extends Configuration {
@@ -25,12 +27,14 @@ public class JBossConfiguration extends Configuration {
 	protected final int managementPort;
 	protected final String profile;
 	protected final Mode mode;
+	protected final File script;
 
 	protected JBossConfiguration(Builder<?> builder) {
 		super(builder);
 		managementPort = builder.managementPort;
 		profile = builder.profile;
 		mode = builder.mode;
+		script = builder.script;
 	}
 
 	public static Builder<?> builder() {
@@ -60,40 +64,26 @@ public class JBossConfiguration extends Configuration {
 		return new File(getBaseDir(), "configuration");
 	}
 
+	@Override
 	public List<String> generateCommand() {
-		final List<String> cmd = super.generateCommand();
-
-		final File jbossModulesJar = new File(directory, "jboss-modules.jar");
-		if (!jbossModulesJar.exists()) {
-			throw new IllegalStateException(String.format("File %s does not exist", jbossModulesJar));
+		if (!script.exists()) {
+			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
 		}
-		cmd.add("-jar");
-		cmd.add(jbossModulesJar.getAbsolutePath());
-
-		// Add executable jar
-		final File modulesFolder = new File(directory, "modules");
-		if (!modulesFolder.exists()) {
-			throw new IllegalStateException(String.format("Folder %s does not exist", modulesFolder));
-		}
-		cmd.add("-mp");
-		cmd.add(modulesFolder.getAbsolutePath());
-
-		if (mode.equals(Mode.STANDALONE)) {
-			cmd.add("-jaxpmodule");
-			cmd.add("javax.xml.jaxp-provider");
-			cmd.add("org.jboss.as.standalone");
-			cmd.add("-c");
-			cmd.add(profile);
+		final List<String> cmd = new ArrayList<>();
+		if (OSDetector.isUnix()) {
+			cmd.add("/bin/bash");
+			cmd.add(script.getAbsolutePath());
+		} else if (OSDetector.isWindows()) {
+			// TODO(mbasovni): Not yet tested!
+			cmd.add("cmd");
+			cmd.add("/c");
+			cmd.add(script.getAbsolutePath());
 		} else {
-			cmd.add("org.jboss.as.process-controller");
-			cmd.add("-jboss-home");
-			cmd.add(directory.getAbsolutePath());
+			throw new UnsupportedOperationException(String.format("Operation system '%s' is not yer supported",
+					OSDetector.OS));
 		}
-
-		cmd.add("-Djboss.home.dir=" + directory.getAbsolutePath());
-		cmd.add("-Djava.net.preferIPv4Stack=true");
-		cmd.add("-Djava.awt.headless=true");
-
+		cmd.add("-c");
+		cmd.add(profile);
 		return cmd;
 	}
 
@@ -115,6 +105,7 @@ public class JBossConfiguration extends Configuration {
 		protected int managementPort;
 		protected String profile;
 		protected Mode mode;
+		protected File script;
 
 		public Builder() {
 			managementPort = 9990;
@@ -138,6 +129,11 @@ public class JBossConfiguration extends Configuration {
 		}
 
 		public JBossConfiguration build() {
+			if (mode.equals(Mode.STANDALONE)) {
+				script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "standalone.bat" : "standalone.sh"));
+			} else {
+				script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "domain.bat" : "domain.sh"));
+			}
 			return new JBossConfiguration(this);
 		}
 	}

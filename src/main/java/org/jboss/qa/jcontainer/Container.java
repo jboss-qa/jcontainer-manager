@@ -59,8 +59,28 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			throw new IllegalArgumentException("Directory of container must exist");
 		}
 		final List<String> cmd = configuration.generateCommand();
+		cmd.addAll(configuration.getParams());
 		logger.debug("Process arguments: " + cmd.toString());
+
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
+
+		// Adjust JAVA_OPTS
+		final StringBuilder javaOpts = new StringBuilder();
+		if (configuration.getXms() != null) {
+			javaOpts.append(" -Xms" + configuration.getXms());
+		}
+		if (configuration.getXmx() != null) {
+			javaOpts.append(" -Xmx" + configuration.getXmx());
+		}
+		if (configuration.getMaxPermSize() != null) {
+			javaOpts.append(" -XX:MaxPermSize=" + configuration.getMaxPermSize());
+		}
+		javaOpts.append(" " + configuration.getEnvProps().get("JAVA_OPTS"));
+		javaOpts.append(" " + System.getenv("JAVA_OPTS"));
+		//configuration.getEnvProps().put("JAVA_OPTS", javaOpts.toString()); // TODO(mbasovni): fix JAVA_OPTS
+
+		processBuilder.environment().putAll(configuration.getEnvProps());
+
 		final Process process = processBuilder.start();
 		int attempts = 30;
 		while (!checkSocket()) {
@@ -86,6 +106,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
+	// TODO(mbasovni): Fix stopping when process started other processes
 	public synchronized void stop() throws Exception {
 		if (isRunning()) {
 			client.close();
