@@ -15,8 +15,9 @@
  */
 package org.jboss.qa.jcontainer.fuse;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.karaf.KarafConfiguration;
-import org.jboss.qa.jcontainer.util.OSDetector;
 
 import java.io.File;
 
@@ -33,13 +34,17 @@ public class FuseConfiguration extends KarafConfiguration {
 	public abstract static class Builder<T extends Builder<T>> extends KarafConfiguration.Builder<T> {
 
 		public Builder() {
+			xms = "512m";
+			xmx = "512m";
+			permSize = "128m";
+			maxPermSize = "256m";
 			username = "admin";
 			password = "admin";
 		}
 
 		public FuseConfiguration build() {
 			super.build();
-			script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "fuse.bat" : "fuse"));
+			script = new File(directory, "/bin/" + (SystemUtils.IS_OS_WINDOWS ? "fuse.bat" : "fuse"));
 			return new FuseConfiguration(this);
 		}
 	}
