@@ -15,22 +15,21 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
 import org.jboss.qa.jcontainer.Container;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<T>, V extends KarafUser>
 		extends Container<T, U, V> {
-
-	private static final Logger logger = LoggerFactory.getLogger(KarafContainer.class);
 
 	public KarafContainer(T configuration) {
 		super(configuration);
@@ -49,5 +48,18 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		for (String group : user.getGroups()) {
 			engine.addGroup(user.getUsername(), group);
 		}
+	}
+
+	@Override
+	public synchronized void start() throws Exception {
+		final File setEnvFile = new File(configuration.getDirectory(), "bin" + File.separator
+				+ (SystemUtils.IS_OS_WINDOWS ? "setenv.bat" : "setenv"));
+		if (setEnvFile != null && setEnvFile.exists()) {
+			final File setEnvBacFile = new File(setEnvFile.getAbsolutePath() + ".backup");
+			setEnvFile.renameTo(setEnvBacFile);
+			log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
+					setEnvFile.getName(), setEnvBacFile.getName());
+		}
+		super.start();
 	}
 }

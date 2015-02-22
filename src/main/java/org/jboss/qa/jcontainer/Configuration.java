@@ -16,10 +16,13 @@
 package org.jboss.qa.jcontainer;
 
 import java.io.File;
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public abstract class Configuration {
 
@@ -30,8 +33,9 @@ public abstract class Configuration {
 	protected final String password;
 	protected final String xms;
 	protected final String xmx;
+	protected final String permSize;
 	protected final String maxPermSize;
-	protected final List<String> params;
+	protected final Set<String> params;
 	protected final Map<String, String> envProps;
 
 	protected Configuration(Builder<?> builder) {
@@ -45,6 +49,7 @@ public abstract class Configuration {
 		// Optional properties
 		xms = builder.xms;
 		xmx = builder.xmx;
+		permSize = builder.permSize;
 		maxPermSize = builder.maxPermSize;
 		params = builder.params;
 		envProps = builder.envProps;
@@ -84,11 +89,15 @@ public abstract class Configuration {
 		return xmx;
 	}
 
+	public String getPermSize() {
+		return permSize;
+	}
+
 	public String getMaxPermSize() {
 		return maxPermSize;
 	}
 
-	public List<String> getParams() {
+	public Set<String> getParams() {
 		return params;
 	}
 
@@ -107,8 +116,9 @@ public abstract class Configuration {
 		protected String password;
 		protected String xms;
 		protected String xmx;
+		protected String permSize;
 		protected String maxPermSize;
-		protected List<String> params;
+		protected Set<String> params;
 		protected Map<String, String> envProps;
 
 		public Builder() {
@@ -116,10 +126,7 @@ public abstract class Configuration {
 			port = 8080;
 			username = "admin";
 			password = "admin";
-			xms = "64m";
-			xmx = "256m";
-			maxPermSize = "512m";
-			params = new ArrayList<>();
+			params = new HashSet<>();
 			envProps = new HashMap<>();
 		}
 
@@ -160,13 +167,23 @@ public abstract class Configuration {
 			return self();
 		}
 
+		public T permSize(String permSize) {
+			this.permSize = permSize;
+			return self();
+		}
+
 		public T maxPermSize(String maxPermSize) {
 			this.maxPermSize = maxPermSize;
 			return self();
 		}
 
-		public T params(List<String> params) {
+		public T params(Collection<String> params) {
 			this.params.addAll(params);
+			return self();
+		}
+
+		public T params(String... params) {
+			this.params.addAll(Arrays.asList(params));
 			return self();
 		}
 

@@ -15,8 +15,10 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.Configuration;
-import org.jboss.qa.jcontainer.util.OSDetector;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -48,13 +50,12 @@ public class KarafConfiguration extends Configuration {
 			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
 		}
 		final List<String> cmd = new ArrayList<>();
-		if (OSDetector.isWindows()) {
-			// TODO(mbasovni): Not yet tested!
+		if (SystemUtils.IS_OS_WINDOWS) {
 			cmd.add("cmd");
 			cmd.add("/c");
 			cmd.add(script.getAbsolutePath());
 		} else {
-			cmd.add("/bin/bash");
+			cmd.add("/bin/sh");
 			cmd.add(script.getAbsolutePath());
 		}
 		return cmd;
@@ -65,6 +66,8 @@ public class KarafConfiguration extends Configuration {
 		protected File script;
 
 		public Builder() {
+			xms = "128m";
+			xmx = "512m";
 			port = 8101;
 			username = "karaf";
 			password = "karaf";
@@ -76,7 +79,19 @@ public class KarafConfiguration extends Configuration {
 		}
 
 		public KarafConfiguration build() {
-			script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "karaf.bat" : "karaf"));
+			script = new File(directory, "bin" + File.separator + (SystemUtils.IS_OS_WINDOWS ? "karaf.bat" : "karaf"));
+			if (!StringUtils.isEmpty(xms)) {
+				envProps.put("JAVA_MIN_MEM", xms);
+			}
+			if (!StringUtils.isEmpty(xmx)) {
+				envProps.put("JAVA_MAX_MEM", xmx);
+			}
+			if (!StringUtils.isEmpty(permSize)) {
+				envProps.put("JAVA_PERM_MEM", permSize);
+			}
+			if (!StringUtils.isEmpty(maxPermSize)) {
+				envProps.put("JAVA_MAX_PERM_MEM", maxPermSize);
+			}
 			return new KarafConfiguration(this);
 		}
 	}

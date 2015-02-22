@@ -17,18 +17,16 @@ package org.jboss.qa.jcontainer;
 
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public abstract class Container<T extends Configuration, U extends Client<T>, V extends User> implements Closeable {
+import lombok.extern.slf4j.Slf4j;
 
-	private static final Logger logger = LoggerFactory.getLogger(Container.class);
+@Slf4j
+public abstract class Container<T extends Configuration, U extends Client<T>, V extends User> implements Closeable {
 
 	protected T configuration;
 	protected U client;
@@ -48,7 +46,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	public synchronized void start() throws Exception {
 		if (isRunning()) {
-			logger.warn("Container is already started");
+			log.warn("Container is already started");
 			return;
 		}
 		if (checkSocket()) {
@@ -60,26 +58,14 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		}
 		final List<String> cmd = configuration.generateCommand();
 		cmd.addAll(configuration.getParams());
-		logger.debug("Process arguments: " + cmd.toString());
+		log.debug("Process arguments: " + cmd.toString());
 
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
-
-		// Adjust JAVA_OPTS
-		final StringBuilder javaOpts = new StringBuilder();
-		if (configuration.getXms() != null) {
-			javaOpts.append(" -Xms" + configuration.getXms());
-		}
-		if (configuration.getXmx() != null) {
-			javaOpts.append(" -Xmx" + configuration.getXmx());
-		}
-		if (configuration.getMaxPermSize() != null) {
-			javaOpts.append(" -XX:MaxPermSize=" + configuration.getMaxPermSize());
-		}
-		javaOpts.append(" " + configuration.getEnvProps().get("JAVA_OPTS"));
-		javaOpts.append(" " + System.getenv("JAVA_OPTS"));
-		//configuration.getEnvProps().put("JAVA_OPTS", javaOpts.toString()); // TODO(mbasovni): fix JAVA_OPTS
-
+		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
+
+//		processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+//		processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
 
 		final Process process = processBuilder.start();
 		int attempts = 30;
@@ -88,9 +74,9 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 				throw new IllegalStateException("Container was not started");
 			}
 			Thread.sleep(TimeUnit.SECONDS.toMillis(5));
-			logger.info("Waiting for container...");
+			log.info("Waiting for container...");
 		}
-		logger.info("Container was started");
+		log.info("Container was started");
 		shutdownThread = new Thread(new Runnable() {
 			public void run() {
 				if (process != null) {
@@ -113,7 +99,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			Runtime.getRuntime().removeShutdownHook(shutdownThread);
 			shutdownThread.start();
 			shutdownThread = null;
-			logger.info("Container was stopped");
+			log.info("Container was stopped");
 		}
 	}
 
@@ -150,7 +136,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		try {
 			return clientClass.getConstructor(confClass).newInstance(configuration);
 		} catch (Exception e) {
-			logger.error("Client was not created");
+			log.error("Client was not created");
 		}
 		return null;
 	}

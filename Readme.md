@@ -2,7 +2,7 @@
 ## Usage
 ### EAP
 ```java
-final EapConfiguration conf = EapConfiguration.builder().directory($EAP_HOME).profile("standalone-full.xml").build();
+final EapConfiguration conf = EapConfiguration.builder().directory($EAP_HOME).profile("standalone-full.xml").xmx("2g").build();
 
 try (Container cont = new EapContainer<>(conf)) {
 	cont.start()
@@ -13,7 +13,7 @@ try (Container cont = new EapContainer<>(conf)) {
 ```
 ### JBoss Fuse
 ```java
-final FuseConfiguration conf = FuseConfiguration.builder().directory($FUSE_HOME).maxPermSize("512m").build();
+final FuseConfiguration conf = FuseConfiguration.builder().directory($FUSE_HOME).xmx("2g").build();
 
 try (Container cont = new FuseContainer<>(conf)) {
 	cont.start()

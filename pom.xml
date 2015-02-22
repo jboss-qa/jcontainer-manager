@@ -11,7 +11,7 @@
 		<skipTests>true</skipTests>
 		<version.java>1.7</version.java>
 		<version.groovy>2.4.0</version.groovy>
-		<version.slf4j>1.6.1</version.slf4j>
+		<version.lombok>1.16.0</version.lombok>
 		<version.wildfly>8.2.0.Final</version.wildfly>
 		<version.osgi>5.0.0</version.osgi>
 		<version.karaf>4.0.0.M1</version.karaf>
@@ -22,6 +22,12 @@
 		<version.apache.commons.codec>1.10</version.apache.commons.codec>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>${version.lombok}</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
@@ -36,11 +42,6 @@
 			<groupId>commons-configuration</groupId>
 			<artifactId>commons-configuration</artifactId>
 			<version>${version.apache.commons.configuration}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<version>${version.slf4j}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.wildfly</groupId>

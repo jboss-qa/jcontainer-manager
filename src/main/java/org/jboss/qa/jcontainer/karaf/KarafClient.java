@@ -28,8 +28,6 @@ import org.apache.sshd.common.keyprovider.FileKeyPairProvider;
 import org.jboss.qa.jcontainer.Client;
 
 import org.fusesource.jansi.AnsiConsole;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -41,9 +39,11 @@ import java.net.URL;
 import java.security.KeyPair;
 import java.util.concurrent.TimeUnit;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
-	private static final Logger logger = LoggerFactory.getLogger(KarafClient.class);
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	protected SshClient client;
 	protected ClientSession session;
@@ -67,7 +67,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 	@Override
 	protected void connectInternal() throws Exception {
-		logger.info("Connecting to server {}:{}", configuration.getHost(), configuration.getPort());
+		log.info("Connecting to server {}:{}", configuration.getHost(), configuration.getPort());
 		client = SshClient.setUpDefaultClient();
 		setupAgent(configuration.getUsername(), configuration.getKeyFile(), client);
 		client.start();
@@ -100,7 +100,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 		serr.writeTo(System.err);
 		final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
 		if (isError) {
-			logger.error(sout.toString());
+			log.error(sout.toString());
 			if (sout.toString().contains(failMsg)) {
 				success = false;
 			} else {
@@ -133,7 +133,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 			}
 			return agent;
 		} catch (Throwable e) {
-			logger.error("Error starting ssh agent for: " + e.getMessage(), e);
+			log.error("Error starting ssh agent for: " + e.getMessage(), e);
 			return null;
 		}
 	}
@@ -149,7 +149,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 			} catch (RuntimeSshException ex) {
 				if (--attempts > 0) {
 					Thread.sleep(TimeUnit.SECONDS.toMillis(2));
-					logger.info("Waiting for SSH connection...");
+					log.info("Waiting for SSH connection...");
 				} else {
 					throw ex;
 				}

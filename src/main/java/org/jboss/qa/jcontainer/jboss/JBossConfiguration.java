@@ -15,8 +15,10 @@
  */
 package org.jboss.qa.jcontainer.jboss;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.Configuration;
-import org.jboss.qa.jcontainer.util.OSDetector;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -35,6 +37,9 @@ public class JBossConfiguration extends Configuration {
 		profile = builder.profile;
 		mode = builder.mode;
 		script = builder.script;
+		// Following environment property ensures that jboss-modules process will be killed
+		// when container is stopped.
+		envProps.put("LAUNCH_JBOSS_IN_BACKGROUND", "true");
 	}
 
 	public static Builder<?> builder() {
@@ -70,13 +75,12 @@ public class JBossConfiguration extends Configuration {
 			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
 		}
 		final List<String> cmd = new ArrayList<>();
-		if (OSDetector.isWindows()) {
-			// TODO(mbasovni): Not yet tested!
+		if (SystemUtils.IS_OS_WINDOWS) {
 			cmd.add("cmd");
 			cmd.add("/c");
 			cmd.add(script.getAbsolutePath());
 		} else {
-			cmd.add("/bin/bash");
+			cmd.add("/bin/sh");
 			cmd.add(script.getAbsolutePath());
 		}
 		cmd.add("-c");
@@ -105,6 +109,9 @@ public class JBossConfiguration extends Configuration {
 		protected File script;
 
 		public Builder() {
+			xms = "1303m";
+			xmx = "1303m";
+			maxPermSize = "256m";
 			managementPort = 9990;
 			profile = "standalone.xml";
 			mode = Mode.STANDALONE;
@@ -126,11 +133,33 @@ public class JBossConfiguration extends Configuration {
 		}
 
 		public JBossConfiguration build() {
+			// Set script
 			if (mode.equals(Mode.STANDALONE)) {
-				script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "standalone.bat" : "standalone.sh"));
+				script = new File(directory, "bin" + File.separator
+						+ (SystemUtils.IS_OS_WINDOWS ? "standalone.bat" : "standalone.sh"));
 			} else {
-				script = new File(directory, "/bin/" + (OSDetector.isWindows() ? "domain.bat" : "domain.sh"));
+				script = new File(directory, "bin" + File.separator
+						+ (SystemUtils.IS_OS_WINDOWS ? "domain.bat" : "domain.sh"));
 			}
+
+			// Set JAVA_OPTS
+			final StringBuffer javaOpts = new StringBuffer();
+			if (!StringUtils.isEmpty(xms)) {
+				javaOpts.append(" -Xms" + xms);
+			}
+			if (!StringUtils.isEmpty(xmx)) {
+				javaOpts.append(" -Xmx" + xmx);
+			}
+			if (!StringUtils.isEmpty(permSize)) {
+				javaOpts.append(" -XX:PermSize=" + permSize);
+			}
+			if (!StringUtils.isEmpty(maxPermSize)) {
+				javaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
+			}
+			javaOpts.append(" -Djava.net.preferIPv4Stack=true");
+			javaOpts.append(" -Djava.awt.headless=true");
+			envProps.put("JAVA_OPTS", javaOpts.toString());
+
 			return new JBossConfiguration(this);
 		}
 	}

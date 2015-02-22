@@ -15,17 +15,16 @@
  */
 package org.jboss.qa.jcontainer.test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class ContainerTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(ContainerTest.class);
 	private static final Properties props = new Properties();
 
 	static {
@@ -33,7 +32,7 @@ public abstract class ContainerTest {
 		try (InputStream is = new FileInputStream(testPropertiesFile)) {
 			props.load(is);
 		} catch (IOException e) {
-			logger.warn("File {} does not exist", testPropertiesFile);
+			log.warn("File {} does not exist", testPropertiesFile);
 		}
 	}
 

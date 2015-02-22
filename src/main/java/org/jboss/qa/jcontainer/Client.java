@@ -15,15 +15,14 @@
  */
 package org.jboss.qa.jcontainer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.Closeable;
 import java.io.IOException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public abstract class Client<T extends Configuration> implements Closeable {
 
-	private static final Logger logger = LoggerFactory.getLogger(Client.class);
 	protected T configuration;
 
 	public Client(T configuration) {
@@ -42,13 +41,13 @@ public abstract class Client<T extends Configuration> implements Closeable {
 		if (!isConnected()) {
 			connectInternal();
 		}
-		logger.info("Client was connected");
+		log.info("Client was connected");
 	}
 
 	protected abstract boolean executeInternal(String command) throws Exception;
 
 	public boolean execute(String command) throws Exception {
-		logger.info("Execute command: {}", command);
+		log.info("Execute command: {}", command);
 		if (!isConnected()) {
 			connect();
 		}
@@ -62,6 +61,6 @@ public abstract class Client<T extends Configuration> implements Closeable {
 		if (isConnected()) {
 			closeInternal();
 		}
-		logger.info("Client was disconnected");
+		log.info("Client was disconnected");
 	}
 }
