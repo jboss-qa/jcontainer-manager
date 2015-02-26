@@ -53,7 +53,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			throw new IllegalStateException(String.format("Another container is already running on %s:%d",
 					configuration.host, configuration.port));
 		}
-		if (configuration.getDirectory() == null && configuration.getDirectory().exists()) {
+		if (configuration.getDirectory() == null || !configuration.getDirectory().exists()) {
 			throw new IllegalArgumentException("Directory of container must exist");
 		}
 		final List<String> cmd = configuration.generateCommand();
@@ -63,9 +63,6 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
 		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
-
-//		processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
-//		processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
 
 		final Process process = processBuilder.start();
 		int attempts = 30;
@@ -92,7 +89,6 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
-	// TODO(mbasovni): Fix stopping when process started other processes
 	public synchronized void stop() throws Exception {
 		if (isRunning()) {
 			client.close();
