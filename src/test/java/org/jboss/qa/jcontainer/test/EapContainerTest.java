@@ -18,7 +18,9 @@ package org.jboss.qa.jcontainer.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.jboss.qa.jcontainer.Client;
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.eap.EapClient;
 import org.jboss.qa.jcontainer.eap.EapConfiguration;
 import org.jboss.qa.jcontainer.eap.EapContainer;
 import org.jboss.qa.jcontainer.eap.EapUser;
@@ -40,8 +42,8 @@ public class EapContainerTest extends ContainerTest {
 		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).xmx("2g").build();
 		container = new EapContainer<>(conf);
 		final EapUser user = new EapUser();
-		user.setUsername("admin");
-		user.setPassword("admin");
+		user.setUsername(conf.getUsername());
+		user.setPassword(conf.getPassword());
 		user.setRealm(JBossUser.Realm.MANAGEMENT_REALM);
 		user.addRoles("role1", "role2");
 		container.addUser(user);
@@ -72,5 +74,12 @@ public class EapContainerTest extends ContainerTest {
 
 	public boolean cmdTest(String cmd) throws Exception {
 		return container.getClient().execute(cmd);
+	}
+
+	@Test
+	public void standaloneClientTest() throws Exception {
+		try (Client client = new EapClient<>(EapConfiguration.builder().build())) {
+			assertTrue(client.execute(":whoami"));
+		}
 	}
 }

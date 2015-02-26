@@ -18,7 +18,9 @@ package org.jboss.qa.jcontainer.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.jboss.qa.jcontainer.Client;
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.fuse.FuseClient;
 import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
 import org.jboss.qa.jcontainer.fuse.FuseContainer;
 import org.jboss.qa.jcontainer.fuse.FuseUser;
@@ -39,8 +41,8 @@ public class FuseContainerTest extends ContainerTest {
 		final FuseConfiguration conf = FuseConfiguration.builder().directory(FUSE_HOME).xmx("2g").build();
 		container = new FuseContainer<>(conf);
 		final FuseUser user = new FuseUser();
-		user.setUsername("admin");
-		user.setPassword("admin");
+		user.setUsername(conf.getUsername());
+		user.setPassword(conf.getPassword());
 		user.addRoles("admin", "SuperUser");
 		container.addUser(user);
 		container.start();
@@ -55,7 +57,7 @@ public class FuseContainerTest extends ContainerTest {
 
 	@Test
 	public void successCmdTest() throws Exception {
-		assertTrue(cmdTest("osgi:info"));
+		assertTrue(cmdTest("osgi:version"));
 	}
 
 	@Test
@@ -70,5 +72,12 @@ public class FuseContainerTest extends ContainerTest {
 
 	public boolean cmdTest(String cmd) throws Exception {
 		return container.getClient().execute(cmd);
+	}
+
+	@Test
+	public void standaloneClientTest() throws Exception {
+		try (Client client = new FuseClient<>(FuseConfiguration.builder().build())) {
+			assertTrue(client.execute("osgi:version"));
+		}
 	}
 }

@@ -40,13 +40,13 @@ public abstract class Configuration {
 
 	protected Configuration(Builder<?> builder) {
 		// Mandatory properties
-		checkMandatoryProperty("directory", directory = builder.directory);
 		checkMandatoryProperty("host", host = builder.host);
 		checkMandatoryProperty("port", port = builder.port);
 		checkMandatoryProperty("username", username = builder.username);
 		checkMandatoryProperty("password", password = builder.password);
 
 		// Optional properties
+		directory = builder.directory; // Mandatory for container but not for standalone client.
 		xms = builder.xms;
 		xmx = builder.xmx;
 		permSize = builder.permSize;

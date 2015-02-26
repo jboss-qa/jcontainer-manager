@@ -11,6 +11,12 @@ try (Container cont = new EapContainer<>(conf)) {
 	}
 }
 ```
+Standalone client:
+```java
+try (Client client = new EapClient<>(EapConfiguration.builder().build())) {
+    client.execute(":whoami");
+}
+```
 ### JBoss Fuse
 ```java
 final FuseConfiguration conf = FuseConfiguration.builder().directory($FUSE_HOME).xmx("2g").build();
@@ -20,6 +26,12 @@ try (Container cont = new FuseContainer<>(conf)) {
 	try(Client cli = container.getClient()) {
 		cli.execute("osgi:info");
 	}
+}
+```
+Standalone client:
+```java
+try (Client client = new FuseClient<>(FuseConfiguration.builder().build())) {
+	client.execute("osgi:version");
 }
 ```
 
