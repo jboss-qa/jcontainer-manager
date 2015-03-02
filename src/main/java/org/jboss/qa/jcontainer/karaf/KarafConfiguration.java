@@ -55,7 +55,7 @@ public class KarafConfiguration extends Configuration {
 			cmd.add("/c");
 			cmd.add(script.getAbsolutePath());
 		} else {
-			cmd.add("/bin/sh");
+			cmd.add("/bin/bash");
 			cmd.add(script.getAbsolutePath());
 		}
 		return cmd;
