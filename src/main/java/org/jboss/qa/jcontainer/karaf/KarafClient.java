@@ -52,6 +52,8 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 	private static final String COMMAND_FAIL_MSG = "Error executing command";
 	private static final String NEW_LINE = System.getProperty("line.separator");
 
+	private String commandResult;
+
 	protected SshClient client;
 	protected ClientSession session;
 
@@ -87,7 +89,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 	@Override
 	protected boolean executeInternal(String command) throws Exception {
-		boolean success = true;
+		commandResult = null; // executing new command, reset previous result
 		final ClientChannel channel = session.createChannel("exec", command.concat(NEW_LINE));
 		try (
 				InputStream in = new ByteArrayInputStream(new byte[0]);
@@ -104,19 +106,23 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 			out.writeTo(System.out);
 			err.writeTo(System.err);
 
+			commandResult = out.toString();
 			final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
 			if (isError) {
-				log.error(out.toString());
-				if (out.toString().contains(COMMAND_FAIL_MSG)) {
-					success = false;
-				} else {
-					throw new UnsupportedOperationException("Unsupported operation: " + command);
+				log.error(commandResult);
+				if (commandResult.contains(COMMAND_FAIL_MSG)) {
+					return false;
 				}
+				throw new UnsupportedOperationException("Unsupported operation: " + command);
 			}
 		} finally {
 			channel.close(true);
 		}
-		return success;
+		return true;
+	}
+
+	public String getCommandResult() {
+		return commandResult;
 	}
 
 	protected void setupAgent(String user, File keyFile, SshClient client) {
