@@ -44,7 +44,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
+	/**
+	 * Error message for failed command.
+	 * See:
+	 * https://github.com/apache/karaf/blob/master/shell/console/src/main/java/org/apache/felix/gogo/commands/CommandException.java#L58
+	 */
+	private static final String COMMAND_FAIL_MSG = "Error executing command";
 	private static final String NEW_LINE = System.getProperty("line.separator");
+
+	private String commandResult;
+
 	protected SshClient client;
 	protected ClientSession session;
 
@@ -80,34 +89,40 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 	@Override
 	protected boolean executeInternal(String command) throws Exception {
-		// https://github.com/apache/karaf/blob/master/shell/core/src/main/java/org/apache/karaf/shell/support/
-		// ShellUtil.java#L158
-		final String exceptionMsg = "Command not found";
-		// https://github.com/apache/karaf/blob/master/shell/console/src/main/java/org/apache/felix/gogo/commands/
-		// CommandException.java#L58
-		final String failMsg = "Error executing command";
-
-		boolean success = true;
+		commandResult = null; // executing new command, reset previous result
 		final ClientChannel channel = session.createChannel("exec", command.concat(NEW_LINE));
-		channel.setIn(new ByteArrayInputStream(new byte[0]));
-		final ByteArrayOutputStream sout = new ByteArrayOutputStream();
-		final ByteArrayOutputStream serr = new ByteArrayOutputStream();
-		channel.setOut(AnsiConsole.wrapOutputStream(sout));
-		channel.setErr(AnsiConsole.wrapOutputStream(serr));
-		channel.open();
-		channel.waitFor(ClientChannel.CLOSED, 0);
-		sout.writeTo(System.out);
-		serr.writeTo(System.err);
-		final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
-		if (isError) {
-			log.error(sout.toString());
-			if (sout.toString().contains(failMsg)) {
-				success = false;
-			} else {
+		try (
+				InputStream in = new ByteArrayInputStream(new byte[0]);
+				ByteArrayOutputStream out = new ByteArrayOutputStream();
+				ByteArrayOutputStream err = new ByteArrayOutputStream()
+		) {
+			channel.setIn(in);
+			channel.setOut(AnsiConsole.wrapOutputStream(out));
+			channel.setErr(AnsiConsole.wrapOutputStream(err));
+
+			channel.open();
+			channel.waitFor(ClientChannel.CLOSED, 0);
+
+			out.writeTo(System.out);
+			err.writeTo(System.err);
+
+			commandResult = out.toString();
+			final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
+			if (isError) {
+				log.error(commandResult);
+				if (commandResult.contains(COMMAND_FAIL_MSG)) {
+					return false;
+				}
 				throw new UnsupportedOperationException("Unsupported operation: " + command);
 			}
+		} finally {
+			channel.close(true);
 		}
-		return success;
+		return true;
+	}
+
+	public String getCommandResult() {
+		return commandResult;
 	}
 
 	protected void setupAgent(String user, File keyFile, SshClient client) {

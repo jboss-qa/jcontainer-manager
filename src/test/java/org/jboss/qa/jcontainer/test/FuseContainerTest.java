@@ -16,9 +16,9 @@
 package org.jboss.qa.jcontainer.test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.qa.jcontainer.Client;
 import org.jboss.qa.jcontainer.Container;
 import org.jboss.qa.jcontainer.fuse.FuseClient;
 import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
@@ -57,27 +57,26 @@ public class FuseContainerTest extends ContainerTest {
 
 	@Test
 	public void successCmdTest() throws Exception {
-		assertTrue(cmdTest("osgi:version"));
+		assertTrue(container.getClient().execute("osgi:version"));
+		assertNotNull(((FuseClient) container.getClient()).getCommandResult());
 	}
 
 	@Test
 	public void failCmdTest() throws Exception {
-		assertFalse(cmdTest("osgi:install xxx"));
+		assertFalse(container.getClient().execute("osgi:install xxx"));
+		assertTrue(((FuseClient) container.getClient()).getCommandResult().contains("Error"));
 	}
 
 	@Test(expected = Exception.class)
 	public void exceptionCmdTest() throws Exception {
-		cmdTest("osgi:xxx");
-	}
-
-	public boolean cmdTest(String cmd) throws Exception {
-		return container.getClient().execute(cmd);
+		container.getClient().execute("osgi:xxx");
 	}
 
 	@Test
 	public void standaloneClientTest() throws Exception {
-		try (Client client = new FuseClient<>(FuseConfiguration.builder().build())) {
+		try (FuseClient client = new FuseClient<>(FuseConfiguration.builder().build())) {
 			assertTrue(client.execute("osgi:version"));
+			assertNotNull(client.getCommandResult());
 		}
 	}
 }

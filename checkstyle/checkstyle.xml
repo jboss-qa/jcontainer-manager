@@ -136,6 +136,7 @@
 		<!-- Checks for long source files -->
 		<module name="LineLength">
 			<property name="max" value="120"/>
+			<property name="severity" value="warning"/>
 		</module>
 		<!-- Checks for long anonymous inner classes -->
 		<module name="AnonInnerLength">

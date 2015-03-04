@@ -18,7 +18,6 @@ package org.jboss.qa.jcontainer.test;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.jboss.qa.jcontainer.Client;
 import org.jboss.qa.jcontainer.Container;
 import org.jboss.qa.jcontainer.eap.EapClient;
 import org.jboss.qa.jcontainer.eap.EapConfiguration;
@@ -34,6 +33,9 @@ import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public class EapContainerTest extends ContainerTest {
+
+	private static final String SUCCESS_OP = "\"outcome\" => \"success\"";
+	private static final String FAILED_OP = "\"outcome\" => \"failed\"";
 
 	protected static Container container;
 
@@ -59,27 +61,26 @@ public class EapContainerTest extends ContainerTest {
 
 	@Test
 	public void successCmdTest() throws Exception {
-		assertTrue(cmdTest(":whoami"));
+		assertTrue(container.getClient().execute(":whoami"));
+		assertTrue(((EapClient) container.getClient()).getCommandResult().asString().contains(SUCCESS_OP));
 	}
 
 	@Test
 	public void failCmdTest() throws Exception {
-		assertFalse(cmdTest(":bad-operation"));
+		assertFalse(container.getClient().execute(":bad-operation"));
+		assertTrue(((EapClient) container.getClient()).getCommandResult().asString().contains(FAILED_OP));
 	}
 
 	@Test(expected = Exception.class)
 	public void exceptionCmdTest() throws Exception {
-		cmdTest("bad-format");
-	}
-
-	public boolean cmdTest(String cmd) throws Exception {
-		return container.getClient().execute(cmd);
+		container.getClient().execute("bad-format");
 	}
 
 	@Test
 	public void standaloneClientTest() throws Exception {
-		try (Client client = new EapClient<>(EapConfiguration.builder().build())) {
+		try (EapClient client = new EapClient<>(EapConfiguration.builder().build())) {
 			assertTrue(client.execute(":whoami"));
+			assertTrue(client.getCommandResult().asString().contains(SUCCESS_OP));
 		}
 	}
 }

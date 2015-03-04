@@ -34,6 +34,8 @@ import java.net.InetAddress;
 
 public class JBossClient<T extends JBossConfiguration> extends Client<T> {
 
+	private ModelNode commandResult;
+
 	protected CommandContext context;
 
 	public JBossClient(T configuration) {
@@ -54,16 +56,19 @@ public class JBossClient<T extends JBossConfiguration> extends Client<T> {
 
 	@Override
 	protected boolean executeInternal(String command) throws Exception {
-		final ModelNode result = context.getModelControllerClient().execute(context.buildRequest(command));
-		return isSuccess(result);
+		commandResult = null; // executing new command, reset previous result
+		commandResult = context.getModelControllerClient().execute(context.buildRequest(command));
+		return isSuccess();
 	}
 
-	protected boolean isSuccess(ModelNode operationResponse) {
-		if (operationResponse != null) {
-			return operationResponse.hasDefined("outcome")
-					&& "success".equals(operationResponse.get("outcome").asString());
-		}
-		return false;
+	public ModelNode getCommandResult() {
+		return commandResult;
+	}
+
+	protected boolean isSuccess() {
+		return commandResult != null
+				&& commandResult.hasDefined("outcome")
+				&& "success".equals(commandResult.get("outcome").asString());
 	}
 
 	@Override
