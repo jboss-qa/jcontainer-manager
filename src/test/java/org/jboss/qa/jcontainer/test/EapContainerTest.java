@@ -15,8 +15,7 @@
  */
 package org.jboss.qa.jcontainer.test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import org.jboss.qa.jcontainer.Container;
 import org.jboss.qa.jcontainer.eap.EapClient;
@@ -26,21 +25,32 @@ import org.jboss.qa.jcontainer.eap.EapUser;
 import org.jboss.qa.jcontainer.jboss.JBossUser;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RunWith(JUnit4.class)
 public class EapContainerTest extends ContainerTest {
 
-	private static final String SUCCESS_OP = "\"outcome\" => \"success\"";
-	private static final String FAILED_OP = "\"outcome\" => \"failed\"";
+	private static final String GOOD_CMD = ":whoami";
+	private static final String BAD_FORMAT_CMD = ":bad-operation";
+	private static final String BAD_RESULT_CMD = "/system-property=NONEXISTING:read-resource";
+
+	private static final String PROP_NAME = "my-prop";
+	private static final String PROP_VAL = "my-value";
 
 	protected static Container container;
 
 	@BeforeClass
-	public static void before() throws Exception {
+	public static void beforeClass() throws Exception {
 		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).xmx("2g").build();
 		container = new EapContainer<>(conf);
 		final EapUser user = new EapUser();
@@ -53,34 +63,67 @@ public class EapContainerTest extends ContainerTest {
 	}
 
 	@AfterClass
-	public static void after() throws Exception {
+	public static void afterClass() throws Exception {
 		if (container != null) {
 			container.stop();
 		}
 	}
 
+	@Before
+	public void before() throws Exception {
+		final List<String> cmds = new ArrayList<>();
+		cmds.add(String.format("if (outcome == success) of /system-property=%s:read-resource", PROP_NAME));
+		cmds.add(String.format("/system-property=%s:remove", PROP_NAME));
+		cmds.add("end-if");
+		container.getClient().execute(cmds);
+	}
+
 	@Test
 	public void successCmdTest() throws Exception {
-		assertTrue(container.getClient().execute(":whoami"));
-		assertTrue(((EapClient) container.getClient()).getCommandResult().asString().contains(SUCCESS_OP));
+		container.getClient().execute(GOOD_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badFormatCmdTest() throws Exception {
+		container.getClient().execute(BAD_FORMAT_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badResultCmdTest() throws Exception {
+		container.getClient().execute(BAD_RESULT_CMD);
 	}
 
 	@Test
-	public void failCmdTest() throws Exception {
-		assertFalse(container.getClient().execute(":bad-operation"));
-		assertTrue(((EapClient) container.getClient()).getCommandResult().asString().contains(FAILED_OP));
+	public void successBatchTest() throws Exception {
+		final List<String> cmds = new ArrayList<>();
+		cmds.add("batch");
+		cmds.add(String.format("/system-property=%s:add(value=%s)", PROP_NAME, PROP_VAL));
+		cmds.add(GOOD_CMD);
+		cmds.add("run-batch");
+		container.getClient().execute(cmds);
+		container.getClient().execute(String.format("/system-property=%s:read-resource", PROP_NAME));
 	}
 
-	@Test(expected = Exception.class)
-	public void exceptionCmdTest() throws Exception {
-		container.getClient().execute("bad-format");
+	@Test(expected = IllegalArgumentException.class)
+	public void failBatchTest() throws Exception {
+		final List<String> cmds = new ArrayList<>();
+		cmds.add("batch");
+		cmds.add(String.format("/system-property=%s:add(value=%s)", PROP_NAME, PROP_VAL)); // Step #1
+		cmds.add(BAD_RESULT_CMD);
+		cmds.add("run-batch");
+		try {
+			container.getClient().execute(cmds);
+		} catch (Exception e) {
+			log.info("Batch failed");
+		}
+		container.getClient().execute(String.format("/system-property=%s:read-resource", PROP_NAME));
 	}
 
 	@Test
 	public void standaloneClientTest() throws Exception {
 		try (EapClient client = new EapClient<>(EapConfiguration.builder().build())) {
-			assertTrue(client.execute(":whoami"));
-			assertTrue(client.getCommandResult().asString().contains(SUCCESS_OP));
+			client.execute(GOOD_CMD);
+			assertNotNull(client.getCommandResult());
 		}
 	}
 }

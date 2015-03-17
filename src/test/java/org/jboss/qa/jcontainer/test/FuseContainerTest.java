@@ -26,18 +26,32 @@ import org.jboss.qa.jcontainer.fuse.FuseContainer;
 import org.jboss.qa.jcontainer.fuse.FuseUser;
 
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 @RunWith(JUnit4.class)
 public class FuseContainerTest extends ContainerTest {
+
+	private static final String GOOD_CMD = "osgi:version";
+	private static final String BAD_FORMAT_CMD = "osgi:xxx";
+	private static final String BAD_RESULT_CMD = "osgi:install xxx";
+
+	private static final String CONFIG = "my.config";
+	private static final String PROP_NAME = "my-prop";
+	private static final String PROP_VAL = "my-value";
 
 	protected static Container container;
 
 	@BeforeClass
-	public static void before() throws Exception {
+	public static void beforeClass() throws Exception {
 		final FuseConfiguration conf = FuseConfiguration.builder().directory(FUSE_HOME).xmx("2g").build();
 		container = new FuseContainer<>(conf);
 		final FuseUser user = new FuseUser();
@@ -49,34 +63,69 @@ public class FuseContainerTest extends ContainerTest {
 	}
 
 	@AfterClass
-	public static void after() throws Exception {
+	public static void afterClass() throws Exception {
 		if (container != null) {
 			container.stop();
 		}
 	}
 
+	@Before
+	public void before() throws Exception {
+		System.out.println(getConfigFile(CONFIG).getAbsolutePath());
+		getConfigFile(CONFIG).delete();
+	}
+
 	@Test
 	public void successCmdTest() throws Exception {
-		assertTrue(container.getClient().execute("osgi:version"));
-		assertNotNull(((FuseClient) container.getClient()).getCommandResult());
+		container.getClient().execute(GOOD_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badResultCmdTest() throws Exception {
+		container.getClient().execute(BAD_RESULT_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badFormatCmdTest() throws Exception {
+		container.getClient().execute(BAD_FORMAT_CMD);
 	}
 
 	@Test
-	public void failCmdTest() throws Exception {
-		assertFalse(container.getClient().execute("osgi:install xxx"));
-		assertTrue(((FuseClient) container.getClient()).getCommandResult().contains("Error"));
+	public void successBatchTest() throws Exception {
+		final List<String> cmds = new ArrayList<>();
+		cmds.add(String.format("config:edit %s", CONFIG));
+		cmds.add(String.format("config:propset %s %s", PROP_NAME, PROP_VAL));
+		cmds.add("config:update");
+		container.getClient().execute(cmds);
+		assertTrue(getConfigFile(CONFIG).exists());
 	}
 
-	@Test(expected = Exception.class)
-	public void exceptionCmdTest() throws Exception {
-		container.getClient().execute("osgi:xxx");
+	@Ignore("Batch rollback is not supported in JBoss Fuse")
+	@Test
+	public void failBatchTest() throws Exception {
+		final List<String> cmds = new ArrayList<>();
+		try {
+			cmds.add(String.format("config:edit %s", CONFIG));
+			cmds.add(String.format("config:propset %s %s", PROP_NAME, PROP_VAL));
+			cmds.add("config:update");
+			cmds.add(BAD_FORMAT_CMD);
+			container.getClient().execute(cmds);
+		} catch (Exception e) {
+			assertFalse(getConfigFile(CONFIG).exists());
+		}
 	}
 
 	@Test
 	public void standaloneClientTest() throws Exception {
 		try (FuseClient client = new FuseClient<>(FuseConfiguration.builder().build())) {
-			assertTrue(client.execute("osgi:version"));
+			client.execute(GOOD_CMD);
 			assertNotNull(client.getCommandResult());
 		}
 	}
+
+	private File getConfigFile(String name) {
+		return new File(container.getConfiguration().getDirectory(), String.format("etc%s%s.cfg",
+				File.separator, name));
+	}
 }
+

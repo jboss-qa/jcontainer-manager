@@ -17,6 +17,7 @@ package org.jboss.qa.jcontainer;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,14 +45,28 @@ public abstract class Client<T extends Configuration> implements Closeable {
 		log.info("Client was connected");
 	}
 
-	protected abstract boolean executeInternal(String command) throws Exception;
+	protected abstract void executeInternal(String command) throws Exception;
 
-	public boolean execute(String command) throws Exception {
+	protected abstract void executeInternal(List<String> commands) throws Exception;
+
+	public void execute(String command) throws Exception {
 		log.info("Execute command: {}", command);
 		if (!isConnected()) {
 			connect();
 		}
-		return executeInternal(command);
+		executeInternal(command);
+	}
+
+	public void execute(List<String> commands) throws Exception {
+		log.info("Execute commands:");
+		int i = 1;
+		for (String cmd : commands) {
+			log.info("#{}\t{}", i++, cmd);
+		}
+		if (!isConnected()) {
+			connect();
+		}
+		executeInternal(commands);
 	}
 
 	protected abstract void closeInternal() throws IOException;
