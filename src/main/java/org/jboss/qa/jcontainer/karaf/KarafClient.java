@@ -35,8 +35,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.URL;
 import java.security.KeyPair;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +91,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 	}
 
 	@Override
-	protected boolean executeInternal(String command) throws Exception {
+	protected void executeInternal(String command) throws Exception {
 		commandResult = null; // executing new command, reset previous result
 		final ClientChannel channel = session.createChannel("exec", command.concat(NEW_LINE));
 		try (
@@ -110,15 +113,21 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 			final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
 			if (isError) {
 				log.error(commandResult);
-				if (commandResult.contains(COMMAND_FAIL_MSG)) {
-					return false;
-				}
-				throw new UnsupportedOperationException("Unsupported operation: " + command);
+				throw new IllegalArgumentException(String.format("Operation '%s' failed", command));
 			}
 		} finally {
 			channel.close(true);
 		}
-		return true;
+	}
+
+	@Override
+	protected void executeInternal(List<String> commands) throws Exception {
+		final StringWriter sw = new StringWriter();
+		final PrintWriter pw = new PrintWriter(sw, true);
+		for (String cmd : commands) {
+			pw.println(cmd);
+		}
+		executeInternal(sw.toString());
 	}
 
 	public String getCommandResult() {

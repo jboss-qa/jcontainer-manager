@@ -17,7 +17,8 @@ package org.jboss.qa.jcontainer.jboss;
 
 import org.jboss.as.cli.CliInitializationException;
 import org.jboss.as.cli.CommandContext;
-import org.jboss.as.cli.CommandContextFactory;
+import org.jboss.as.cli.CommandLineException;
+import org.jboss.as.cli.impl.ExtendedCommandContextImpl;
 import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.dmr.ModelNode;
 import org.jboss.qa.jcontainer.Client;
@@ -31,10 +32,12 @@ import javax.security.sasl.RealmCallback;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class JBossClient<T extends JBossConfiguration> extends Client<T> {
-
-	private ModelNode commandResult;
 
 	protected CommandContext context;
 
@@ -44,7 +47,7 @@ public class JBossClient<T extends JBossConfiguration> extends Client<T> {
 
 	@Override
 	public boolean isConnected() {
-		return context != null && context.isTerminated();
+		return context != null;
 	}
 
 	@Override
@@ -55,26 +58,37 @@ public class JBossClient<T extends JBossConfiguration> extends Client<T> {
 	}
 
 	@Override
-	protected boolean executeInternal(String command) throws Exception {
-		commandResult = null; // executing new command, reset previous result
-		commandResult = context.getModelControllerClient().execute(context.buildRequest(command));
-		return isSuccess();
+	protected void executeInternal(String command) throws Exception {
+		try {
+			context.handle(command);
+		} catch (CommandLineException e) {
+			if (context.getBatchManager().isBatchActive()) {
+				context.getBatchManager().discardActiveBatch();
+			}
+			throw new IllegalArgumentException(String.format("Command execution failed for command '%s'. %s", command,
+					e.getLocalizedMessage()), e);
+		}
 	}
 
-	public ModelNode getCommandResult() {
-		return commandResult;
-	}
-
-	protected boolean isSuccess() {
-		return commandResult != null
-				&& commandResult.hasDefined("outcome")
-				&& "success".equals(commandResult.get("outcome").asString());
+	@Override
+	protected void executeInternal(List<String> commands) throws Exception {
+		for (String cmd : commands) {
+			executeInternal(cmd);
+		}
+		Thread.sleep(500); // NOTE: Result of the operation is not visible immediately
 	}
 
 	@Override
 	protected void closeInternal() throws IOException {
 		context.terminateSession();
 		context = null;
+	}
+
+	public ModelNode getCommandResult() {
+		if (isConnected()) {
+			return ((ExtendedCommandContextImpl) context).getLastResult();
+		}
+		return null;
 	}
 
 	protected ModelControllerClient createClient(final InetAddress host, final int port,
@@ -103,7 +117,7 @@ public class JBossClient<T extends JBossConfiguration> extends Client<T> {
 	protected CommandContext createContext(final ModelControllerClient client) {
 		final CommandContext commandContext;
 		try {
-			commandContext = CommandContextFactory.getInstance().newCommandContext();
+			commandContext = new ExtendedCommandContextImpl();
 			commandContext.bindClient(client);
 		} catch (CliInitializationException e) {
 			throw new IllegalStateException("Failed to initialize CLI context", e);
