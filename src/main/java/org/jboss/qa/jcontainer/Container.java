@@ -17,8 +17,10 @@ package org.jboss.qa.jcontainer;
 
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +29,26 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public abstract class Container<T extends Configuration, U extends Client<T>, V extends User> implements Closeable {
+
+	private static class ContainerLogger implements Runnable {
+
+		private volatile Process process;
+
+		public ContainerLogger(Process process) {
+			this.process = process;
+		}
+
+		@Override
+		public void run() {
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				while (reader.readLine() != null) { // ends with server shutdown
+				}
+				reader.close();
+			} catch (Exception e) {
+				// stream closed
+			}
+		}
+	}
 
 	protected T configuration;
 	protected U client;
@@ -86,6 +108,9 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 				}
 			}
 		});
+
+		// Consume container stream
+		new Thread(new ContainerLogger(process)).start();
 		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
