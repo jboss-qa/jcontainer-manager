@@ -80,7 +80,7 @@ public class JBossConfiguration extends Configuration {
 			cmd.add("/c");
 			cmd.add(script.getAbsolutePath());
 		} else {
-			cmd.add("/bin/bash");
+			cmd.add("bash");
 			cmd.add(script.getAbsolutePath());
 		}
 		cmd.add("-c");
