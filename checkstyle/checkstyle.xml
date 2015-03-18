@@ -176,7 +176,9 @@
 		<!-- http://checkstyle.sf.net/config_blocks.html -->
 
 		<!-- Checks for empty blocks -->
-		<module name="EmptyBlock"/>
+		<module name="EmptyBlock">
+			<property name="severity" value="warning"/>
+		</module>
 		<!-- Checks for the placement of left curly braces ('{') for code blocks -->
 		<module name="LeftCurly"/>
 		<!-- Checks for braces around code blocks -->
