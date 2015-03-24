@@ -32,16 +32,21 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	private static class ContainerLogger implements Runnable {
 
+		private volatile boolean stop;
 		private volatile Process process;
 
 		public ContainerLogger(Process process) {
 			this.process = process;
 		}
 
+		private void stop() {
+			stop = true;
+		}
+
 		@Override
 		public void run() {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				while (reader.readLine() != null) { // ends with server shutdown
+				while (!stop && reader.readLine() != null) { // ends with server shutdown
 				}
 				reader.close();
 			} catch (Exception e) {
@@ -56,6 +61,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	private Class<T> confClass;
 	private Class<U> clientClass;
 	private volatile Thread shutdownThread;
+	private ContainerLogger containerLogger;
 
 	public Container(T configuration) {
 		confClass = ReflectionUtils.getGenericClass(getClass(), 0);
@@ -100,6 +106,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			public void run() {
 				if (process != null) {
 					process.destroy();
+					containerLogger.stop();
 					try {
 						process.waitFor();
 					} catch (InterruptedException e) {
@@ -110,7 +117,8 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		});
 
 		// Consume container stream
-		new Thread(new ContainerLogger(process)).start();
+		containerLogger = new ContainerLogger(process);
+		new Thread(containerLogger).start();
 		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
