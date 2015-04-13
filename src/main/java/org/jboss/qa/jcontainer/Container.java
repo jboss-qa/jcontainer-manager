@@ -127,6 +127,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			client.close();
 			Runtime.getRuntime().removeShutdownHook(shutdownThread);
 			shutdownThread.start();
+			shutdownThread.join();
 			shutdownThread = null;
 			log.info("Container was stopped");
 		}
