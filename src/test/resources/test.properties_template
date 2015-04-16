@@ -2,3 +2,4 @@ jboss.home=
 eap.home=
 karaf.home=
 fuse.home=
+tomcat.home=
