@@ -35,6 +35,14 @@ try (Client client = new FuseClient<>(FuseConfiguration.builder().build())) {
 }
 ```
 
+### Tomcat
+```java
+final TomcatConfiguration conf = TomcatConfiguration.builder().directory($TOMCAT_HOME).xmx("512m").build();
+
+try (Container cont = new TomcatContainer<>(conf)) {
+	cont.start()
+}
+
 ## Tests
 
 You will need to set some properties:
@@ -43,6 +51,7 @@ You will need to set some properties:
  - eap.home
  - karaf.home
  - fuse.home
+ - tomcat.home
 
 You can set them by system property (`-Djboss.home` etc.) or create own copy of `test.properties_template` and set values:
 

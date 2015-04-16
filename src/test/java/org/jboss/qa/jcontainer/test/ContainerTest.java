@@ -40,6 +40,7 @@ public abstract class ContainerTest {
 	public static final String EAP_HOME = getProperty("eap.home");
 	public static final String KARAF_HOME = getProperty("karaf.home");
 	public static final String FUSE_HOME = getProperty("fuse.home");
+	public static final String TOMCAT_HOME = getProperty("tomcat.home");
 
 	public static String getProperty(String key) {
 		final String value = System.getProperty(key);
