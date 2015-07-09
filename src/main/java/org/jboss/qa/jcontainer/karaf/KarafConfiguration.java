@@ -26,14 +26,23 @@ import java.util.List;
 
 public class KarafConfiguration extends Configuration {
 
+	public static final Integer DEFAULT_MANAGEMENT_PORT = 8101;
+	public static final Integer DEFAULT_PORT = 8181;
+
+	protected final int managementPort;
 	protected final File keyFile;
 	protected final File script;
 
 	protected KarafConfiguration(Builder<?> builder) {
 		super(builder);
 		script = builder.script;
+		managementPort = builder.managementPort;
 		//Optional
 		keyFile = builder.keyFile;
+	}
+
+	public int getManagementPort() {
+		return managementPort;
 	}
 
 	public static Builder<?> builder() {
@@ -62,15 +71,22 @@ public class KarafConfiguration extends Configuration {
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+		protected int managementPort;
 		protected File keyFile;
 		protected File script;
 
 		public Builder() {
 			xms = "128m";
 			xmx = "512m";
-			port = 8101;
+			port = DEFAULT_PORT;
+			managementPort = DEFAULT_MANAGEMENT_PORT;
 			username = "karaf";
 			password = "karaf";
+		}
+
+		public T managementPort(int managementPort) {
+			this.managementPort = managementPort;
+			return self();
 		}
 
 		public T keyFile(String keyFile) {

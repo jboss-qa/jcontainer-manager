@@ -166,7 +166,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 		int attempts = 10;
 		do {
 			final ConnectFuture future = client.connect(configuration.getUsername(), configuration.getHost(),
-					configuration.getPort());
+					configuration.getManagementPort());
 			future.await();
 			try {
 				session = future.getSession();

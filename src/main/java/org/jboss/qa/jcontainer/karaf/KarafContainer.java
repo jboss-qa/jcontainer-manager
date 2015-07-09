@@ -15,6 +15,7 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
@@ -50,6 +51,13 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		}
 	}
 
+	protected void setEtcProperty(String key, Object value, String file) throws Exception {
+		final File propsFile = new File(configuration.getDirectory(), "etc" + File.separator + file);
+		final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
+		propConf.setProperty(key, value);
+		propConf.save();
+	}
+
 	@Override
 	public synchronized void start() throws Exception {
 		final File setEnvFile = new File(configuration.getDirectory(), "bin" + File.separator
@@ -59,6 +67,9 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 			setEnvFile.renameTo(setEnvBacFile);
 			log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
 					setEnvFile.getName(), setEnvBacFile.getName());
+		}
+		if (getConfiguration().getManagementPort() != KarafConfiguration.DEFAULT_MANAGEMENT_PORT) {
+			setEtcProperty("sshPort", getConfiguration().getManagementPort(), "org.apache.karaf.shell.cfg");
 		}
 		super.start();
 	}

@@ -40,13 +40,13 @@ import java.util.List;
 @RunWith(JUnit4.class)
 public class FuseContainerTest extends ContainerTest {
 
-	private static final String GOOD_CMD = "osgi:version";
-	private static final String BAD_FORMAT_CMD = "osgi:xxx";
-	private static final String BAD_RESULT_CMD = "osgi:install xxx";
+	protected static final String GOOD_CMD = "osgi:version";
+	protected static final String BAD_FORMAT_CMD = "osgi:xxx";
+	protected static final String BAD_RESULT_CMD = "osgi:install xxx";
 
-	private static final String CONFIG = "my.config";
-	private static final String PROP_NAME = "my-prop";
-	private static final String PROP_VAL = "my-value";
+	protected static final String CONFIG = "my.config";
+	protected static final String PROP_NAME = "my-prop";
+	protected static final String PROP_VAL = "my-value";
 
 	protected static Container container;
 
