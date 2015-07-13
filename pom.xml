@@ -1,20 +1,22 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>org.jboss.qa</groupId>
+	<groupId>org.jboss.qa.jcontainer</groupId>
 	<artifactId>jcontainer-manager</artifactId>
 	<version>1.0.0-SNAPSHOT</version>
+	<modules>
+		<module>core</module>
+		<module>containers</module>
+	</modules>
 	<name>JContainer Manager</name>
 	<description>Manager of java containers</description>
+	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<skipTests>true</skipTests>
 		<version.java>1.7</version.java>
 		<version.groovy>2.4.0</version.groovy>
 		<version.lombok>1.16.0</version.lombok>
-		<version.wildfly>8.2.0.Final</version.wildfly>
-		<version.osgi>5.0.0</version.osgi>
-		<version.karaf>4.0.0.M1</version.karaf>
 		<version.sshd>0.12.0</version.sshd>
 		<version.junit>4.12</version.junit>
 		<version.apache.commons>3.3.2</version.apache.commons>
@@ -44,34 +46,9 @@
 			<version>${version.apache.commons.configuration}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.wildfly</groupId>
-			<artifactId>wildfly-cli</artifactId>
-			<version>${version.wildfly}</version>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.sshd</groupId>
 			<artifactId>sshd-core</artifactId>
 			<version>${version.sshd}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
-			<version>${version.osgi}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.karaf.shell</groupId>
-			<artifactId>org.apache.karaf.shell.console</artifactId>
-			<version>${version.karaf}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.karaf.jaas</groupId>
-			<artifactId>org.apache.karaf.jaas.modules</artifactId>
-			<version>${version.karaf}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.karaf</groupId>
-			<artifactId>org.apache.karaf.client</artifactId>
-			<version>${version.karaf}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

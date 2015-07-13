@@ -4,7 +4,7 @@ bin/
 build/
 
 # Project files
-/src/test/resources/test.properties
+test.properties
 
 # Maven
 log/
