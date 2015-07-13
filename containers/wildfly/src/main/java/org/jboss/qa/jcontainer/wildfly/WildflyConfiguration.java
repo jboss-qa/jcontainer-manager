@@ -26,6 +26,10 @@ import java.util.List;
 
 public class WildflyConfiguration extends Configuration {
 
+	public static final int DEFAULT_HTTP_PORT = 8080;
+	public static final int DEFAULT_MANAGEMENT_PORT = 9990;
+
+	protected final int httpPort;
 	protected final int managementPort;
 	protected final String profile;
 	protected final Mode mode;
@@ -33,6 +37,7 @@ public class WildflyConfiguration extends Configuration {
 
 	protected WildflyConfiguration(Builder<?> builder) {
 		super(builder);
+		httpPort = builder.httpPort;
 		managementPort = builder.managementPort;
 		profile = builder.profile;
 		mode = builder.mode;
@@ -48,6 +53,10 @@ public class WildflyConfiguration extends Configuration {
 
 	public String getProfile() {
 		return profile;
+	}
+
+	public int getHttpPort() {
+		return httpPort;
 	}
 
 	public int getManagementPort() {
@@ -88,6 +97,11 @@ public class WildflyConfiguration extends Configuration {
 		return cmd;
 	}
 
+	@Override
+	public int getBusyPort() {
+		return httpPort;
+	}
+
 	public static enum Mode {
 		STANDALONE("standalone"), MANAGEMENT("management");
 
@@ -103,6 +117,7 @@ public class WildflyConfiguration extends Configuration {
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+		protected int httpPort;
 		protected int managementPort;
 		protected String profile;
 		protected Mode mode;
@@ -112,9 +127,15 @@ public class WildflyConfiguration extends Configuration {
 			xms = "1303m";
 			xmx = "1303m";
 			maxPermSize = "256m";
-			managementPort = 9990;
+			httpPort = DEFAULT_HTTP_PORT;
+			managementPort = DEFAULT_MANAGEMENT_PORT;
 			profile = "standalone.xml";
 			mode = Mode.STANDALONE;
+		}
+
+		public T httpPort(int httpPort) {
+			this.httpPort = httpPort;
+			return self();
 		}
 
 		public T managementPort(int managementPort) {

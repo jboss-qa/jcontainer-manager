@@ -79,7 +79,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 	@Override
 	protected void connectInternal() throws Exception {
-		log.info("Connecting to server {}:{}", configuration.getHost(), configuration.getPort());
+		log.info("Connecting to server {}:{}", configuration.getHost(), configuration.getSshPort());
 		client = SshClient.setUpDefaultClient();
 		setupAgent(configuration.getUsername(), configuration.getKeyFile(), client);
 		client.start();
@@ -111,6 +111,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 			commandResult = out.toString();
 			final boolean isError = (channel.getExitStatus() != null && channel.getExitStatus() != 0);
+
 			if (isError) {
 				log.error(commandResult);
 				throw new IllegalArgumentException(String.format("Operation '%s' failed", command));
@@ -166,7 +167,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 		int attempts = 10;
 		do {
 			final ConnectFuture future = client.connect(configuration.getUsername(), configuration.getHost(),
-					configuration.getManagementPort());
+					configuration.getSshPort());
 			future.await();
 			try {
 				session = future.getSession();

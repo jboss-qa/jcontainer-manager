@@ -26,23 +26,29 @@ import java.util.List;
 
 public class KarafConfiguration extends Configuration {
 
-	public static final Integer DEFAULT_MANAGEMENT_PORT = 8101;
-	public static final Integer DEFAULT_PORT = 8181;
+	public static final int DEFAULT_HTTP_PORT = 8181;
+	public static final int DEFAULT_SSH_PORT = 8101;
 
-	protected final int managementPort;
+	protected final int httpPort;
+	protected final int sshPort;
 	protected final File keyFile;
 	protected final File script;
 
 	protected KarafConfiguration(Builder<?> builder) {
 		super(builder);
 		script = builder.script;
-		managementPort = builder.managementPort;
+		httpPort = builder.httpPort;
+		sshPort = builder.sshPort;
 		//Optional
 		keyFile = builder.keyFile;
 	}
 
-	public int getManagementPort() {
-		return managementPort;
+	public int getHttpPort() {
+		return httpPort;
+	}
+
+	public int getSshPort() {
+		return sshPort;
 	}
 
 	public static Builder<?> builder() {
@@ -70,22 +76,33 @@ public class KarafConfiguration extends Configuration {
 		return cmd;
 	}
 
+	@Override
+	public int getBusyPort() {
+		return sshPort;
+	}
+
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
-		protected int managementPort;
+		protected int httpPort;
+		protected int sshPort;
 		protected File keyFile;
 		protected File script;
 
 		public Builder() {
 			xms = "128m";
 			xmx = "512m";
-			port = DEFAULT_PORT;
-			managementPort = DEFAULT_MANAGEMENT_PORT;
+			httpPort = DEFAULT_HTTP_PORT;
+			sshPort = DEFAULT_SSH_PORT;
 			username = "karaf";
 			password = "karaf";
 		}
 
-		public T managementPort(int managementPort) {
-			this.managementPort = managementPort;
+		public T httpPort(int httpPort) {
+			this.httpPort = httpPort;
+			return self();
+		}
+
+		public T sshPort(int sshPort) {
+			this.sshPort = sshPort;
 			return self();
 		}
 

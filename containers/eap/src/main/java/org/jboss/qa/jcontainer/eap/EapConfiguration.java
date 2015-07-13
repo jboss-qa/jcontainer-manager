@@ -18,6 +18,9 @@ package org.jboss.qa.jcontainer.eap;
 import org.jboss.qa.jcontainer.wildfly.WildflyConfiguration;
 
 public class EapConfiguration extends WildflyConfiguration {
+
+	public static final int DEFAULT_MANAGEMENT_PORT = 9999;
+
 	public EapConfiguration(Builder<?> builder) {
 		super(builder);
 	}
@@ -29,7 +32,7 @@ public class EapConfiguration extends WildflyConfiguration {
 	public abstract static class Builder<T extends Builder<T>> extends WildflyConfiguration.Builder<T> {
 
 		public Builder() {
-			managementPort = 9999;
+			managementPort = DEFAULT_MANAGEMENT_PORT;
 		}
 
 		public EapConfiguration build() {

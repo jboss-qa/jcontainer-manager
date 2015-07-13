@@ -26,8 +26,21 @@ import java.util.List;
 
 public class TomcatConfiguration extends Configuration {
 
+	public static final int DEFAULT_HTTP_PORT = 8080;
+
+	protected final int httpPort;
+
 	protected TomcatConfiguration(Builder<?> builder) {
 		super(builder);
+		httpPort = builder.httpPort;
+	}
+
+	public static Builder<?> builder() {
+		return new Builder2();
+	}
+
+	public int getHttpPort() {
+		return httpPort;
 	}
 
 	@Override
@@ -52,14 +65,23 @@ public class TomcatConfiguration extends Configuration {
 		return cmd;
 	}
 
-	public static Builder<?> builder() {
-		return new Builder2();
+	@Override
+	public int getBusyPort() {
+		return httpPort;
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
 
+		protected int httpPort;
+
 		public Builder() {
+			httpPort = DEFAULT_HTTP_PORT;
 			password = "";
+		}
+
+		public T httpPort(int httpPort) {
+			this.httpPort = httpPort;
+			return self();
 		}
 
 		public TomcatConfiguration build() {

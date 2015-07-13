@@ -13,17 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.fuse.test;
+package org.jboss.qa.jcontainer.karaf;
 
 import org.jboss.qa.jcontainer.test.ContainerTest;
 
-public abstract class FuseContainerTest extends ContainerTest {
+public abstract class KarafContainerTest extends ContainerTest {
 
-	public static final String FUSE_HOME = getProperty("fuse.home");
+	public static final String KARAF_HOME = getProperty("karaf.home");
 
-	protected static final String GOOD_CMD = "osgi:version";
-	protected static final String BAD_FORMAT_CMD = "osgi:xxx";
-	protected static final String BAD_RESULT_CMD = "osgi:install xxx";
+	protected static final String GOOD_CMD = "version";
+	protected static final String BAD_FORMAT_CMD = "xxx";
+	protected static final String BAD_RESULT_CMD = "install xxx";
 
 	protected static final String CONFIG = "my.config";
 	protected static final String PROP_NAME = "my-prop";

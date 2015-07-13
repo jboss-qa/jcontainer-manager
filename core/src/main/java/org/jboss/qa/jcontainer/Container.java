@@ -78,8 +78,8 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			return;
 		}
 		if (checkSocket()) {
-			throw new IllegalStateException(String.format("Another container is already running on %s:%d",
-					configuration.host, configuration.port));
+			throw new IllegalStateException(String.format("Another container already uses %s:%d",
+					configuration.getHost(), configuration.getBusyPort()));
 		}
 		if (configuration.getDirectory() == null || !configuration.getDirectory().exists()) {
 			throw new IllegalArgumentException("Directory of container must exist");
@@ -147,7 +147,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	}
 
 	public synchronized boolean checkSocket() {
-		try (Socket socket = new Socket(configuration.getHost(), configuration.getPort())) {
+		try (Socket socket = new Socket(configuration.getHost(), configuration.getBusyPort())) {
 			return true;
 		} catch (Exception e) {
 			return false;

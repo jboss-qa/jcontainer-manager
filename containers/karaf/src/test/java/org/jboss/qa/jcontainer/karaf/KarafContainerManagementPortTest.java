@@ -13,31 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.fuse.test;
+package org.jboss.qa.jcontainer.karaf;
 
-import org.jboss.qa.jcontainer.fuse.FuseClient;
-import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
-import org.jboss.qa.jcontainer.fuse.FuseContainer;
-import org.jboss.qa.jcontainer.fuse.FuseUser;
-import org.jboss.qa.jcontainer.karaf.KarafContainerManagementPortTest;
+import org.apache.commons.configuration.PropertiesConfiguration;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
-public class FuseContainerManagementPortTest extends KarafContainerManagementPortTest {
+import java.io.File;
 
-	public static final String FUSE_HOME = getProperty("fuse.home");
+@RunWith(JUnit4.class)
+public class KarafContainerManagementPortTest extends KarafContainerTest {
+
+	protected static final Integer MANAGEMENT_PORT = 8102;
+
+	protected static KarafContainer container;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		final FuseConfiguration conf = FuseConfiguration.builder()
-				.sshPort(MANAGEMENT_PORT).directory(FUSE_HOME).xmx("2g").build();
-		container = new FuseContainer<>(conf);
-		final FuseUser user = new FuseUser();
+		final KarafConfiguration conf = KarafConfiguration.builder()
+				.sshPort(MANAGEMENT_PORT).directory(KARAF_HOME).xmx("2g").build();
+		container = new KarafContainer<>(conf);
+		final KarafUser user = new KarafUser();
 		user.setUsername(conf.getUsername());
 		user.setPassword(conf.getPassword());
 		user.addRoles("admin", "SuperUser");
@@ -45,10 +46,21 @@ public class FuseContainerManagementPortTest extends KarafContainerManagementPor
 		container.start();
 	}
 
+	@AfterClass
+	public static void afterClass() throws Exception {
+		if (container != null) {
+			container.stop();
+			final File propsFile = new File(container.getConfiguration().getDirectory(),
+					"etc" + File.separator + "org.apache.karaf.shell.cfg");
+			final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
+			propConf.setProperty("sshPort", KarafConfiguration.DEFAULT_SSH_PORT);
+			propConf.save();
+		}
+	}
+
 	@Test
-	@Override
 	public void standaloneClientTest() throws Exception {
-		try (FuseClient client = new FuseClient<>(FuseConfiguration.builder()
+		try (KarafClient client = new KarafClient<>(KarafConfiguration.builder()
 				.sshPort(MANAGEMENT_PORT).build())) {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());

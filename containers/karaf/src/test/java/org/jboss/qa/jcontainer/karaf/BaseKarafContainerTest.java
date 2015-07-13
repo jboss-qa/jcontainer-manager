@@ -13,37 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.fuse.test;
+package org.jboss.qa.jcontainer.karaf;
 
-import org.jboss.qa.jcontainer.fuse.FuseClient;
-import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
-import org.jboss.qa.jcontainer.fuse.FuseContainer;
-import org.jboss.qa.jcontainer.fuse.FuseUser;
-import org.jboss.qa.jcontainer.karaf.BaseKarafContainerTest;
-
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
+public class BaseKarafContainerTest extends KarafContainerTest {
 
-@Slf4j
-@RunWith(JUnit4.class)
-public class BaseFuseContainerTest extends BaseKarafContainerTest {
-
-	public static final String FUSE_HOME = getProperty("fuse.home");
+	protected static KarafContainer container;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		final FuseConfiguration conf = FuseConfiguration.builder().directory(FUSE_HOME).xmx("2g").build();
-		container = new FuseContainer<>(conf);
-		final FuseUser user = new FuseUser();
+		final KarafConfiguration conf = KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g").build();
+		container = new KarafContainer<>(conf);
+		final KarafUser user = new KarafUser();
 		user.setUsername(conf.getUsername());
 		user.setPassword(conf.getPassword());
 		user.addRoles("admin", "SuperUser");
@@ -51,25 +41,51 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 		container.start();
 	}
 
+	@AfterClass
+	public static void afterClass() throws Exception {
+		if (container != null) {
+			container.stop();
+		}
+	}
+
+	@Before
+	public void before() throws Exception {
+		System.out.println(container.getConfigFile(CONFIG).getAbsolutePath());
+		container.getConfigFile(CONFIG).delete();
+	}
+
 	@Test
-	@Override
+	public void successCmdTest() throws Exception {
+		container.getClient().execute(GOOD_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badResultCmdTest() throws Exception {
+		container.getClient().execute(BAD_RESULT_CMD);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void badFormatCmdTest() throws Exception {
+		container.getClient().execute(BAD_FORMAT_CMD);
+	}
+
+	@Test
 	public void successBatchTest() throws Exception {
 		final List<String> cmds = new ArrayList<>();
 		cmds.add(String.format("config:edit %s", CONFIG));
-		cmds.add(String.format("config:propset %s %s", PROP_NAME, PROP_VAL));
+		cmds.add(String.format("config:property-set %s %s", PROP_NAME, PROP_VAL));
 		cmds.add("config:update");
 		container.getClient().execute(cmds);
 		Assert.assertTrue(container.getConfigFile(CONFIG).exists());
 	}
 
-	@Ignore("Batch rollback is not supported in JBoss Fuse")
+	@Ignore("Batch rollback is not supported in Apache Karaf")
 	@Test
-	@Override
 	public void failBatchTest() throws Exception {
 		final List<String> cmds = new ArrayList<>();
 		try {
 			cmds.add(String.format("config:edit %s", CONFIG));
-			cmds.add(String.format("config:propset %s %s", PROP_NAME, PROP_VAL));
+			cmds.add(String.format("config:property-set %s %s", PROP_NAME, PROP_VAL));
 			cmds.add("config:update");
 			cmds.add(BAD_FORMAT_CMD);
 			container.getClient().execute(cmds);
@@ -79,9 +95,8 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 	}
 
 	@Test
-	@Override
 	public void standaloneClientTest() throws Exception {
-		try (FuseClient client = new FuseClient<>(FuseConfiguration.builder().build())) {
+		try (KarafClient client = new KarafClient<>(KarafConfiguration.builder().build())) {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}

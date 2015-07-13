@@ -68,8 +68,8 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 			log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
 					setEnvFile.getName(), setEnvBacFile.getName());
 		}
-		if (getConfiguration().getManagementPort() != KarafConfiguration.DEFAULT_MANAGEMENT_PORT) {
-			setEtcProperty("sshPort", getConfiguration().getManagementPort(), "org.apache.karaf.shell.cfg");
+		if (getConfiguration().getSshPort() != KarafConfiguration.DEFAULT_SSH_PORT) {
+			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell.cfg");
 		}
 		super.start();
 	}

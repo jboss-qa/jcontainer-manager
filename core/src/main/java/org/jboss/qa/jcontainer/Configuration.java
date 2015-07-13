@@ -69,9 +69,7 @@ public abstract class Configuration {
 		return host;
 	}
 
-	public Integer getPort() {
-		return port;
-	}
+	public abstract int getBusyPort();
 
 	public String getUsername() {
 		return username;
