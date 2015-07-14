@@ -1,60 +1,16 @@
 # JContainer manager
 ## Usage
-### EAP
-```java
-final EapConfiguration conf = EapConfiguration.builder().directory($EAP_HOME).profile("standalone-full.xml").xmx("2g").build();
+- [Wildfly](containers/wildfly/Readme.md)
+- [JBoss EAP](containers/eap/Readme.md)
+- [Apache Karaf](containers/karaf/Readme.md)
+- [JBoss Fuse](containers/fuse/Readme.md)
+- [Apache Tomcat](containers/tomcat/Readme.md)
 
-try (Container cont = new EapContainer<>(conf)) {
-	cont.start()
-	try(Client cli = container.getClient()) {
-		cli.execute(":whoami");
-	}
-}
-```
-Standalone client:
-```java
-try (Client client = new EapClient<>(EapConfiguration.builder().build())) {
-    client.execute(":whoami");
-}
-```
-### JBoss Fuse
-```java
-final FuseConfiguration conf = FuseConfiguration.builder().directory($FUSE_HOME).xmx("2g").build();
-
-try (Container cont = new FuseContainer<>(conf)) {
-	cont.start()
-	try(Client cli = container.getClient()) {
-		cli.execute("osgi:info");
-	}
-}
-```
-Standalone client:
-```java
-try (Client client = new FuseClient<>(FuseConfiguration.builder().build())) {
-	client.execute("osgi:version");
-}
-```
-
-### Tomcat
-```java
-final TomcatConfiguration conf = TomcatConfiguration.builder().directory($TOMCAT_HOME).xmx("512m").build();
-
-try (Container cont = new TomcatContainer<>(conf)) {
-	cont.start()
-}
-```
 
 ## Tests
 
-You will need to set some properties:
-
- - jboss.home
- - eap.home
- - karaf.home
- - fuse.home
- - tomcat.home
-
-You can set them by system property (`-Djboss.home` etc.) or create own copy of `test.properties_template` and set values:
+You will need to set home directories of your containers. You can set them by system property (`-Dwildfly.home` etc.) 
+or create own copy of `test.properties_template` and set values:
 
     cp src/test/resources/test.properties_template src/test/resources/test.properties
 

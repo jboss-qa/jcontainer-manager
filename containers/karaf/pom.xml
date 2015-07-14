@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>org.jboss.qa.jcontainer.containers</groupId>
+		<artifactId>containers-parent</artifactId>
+		<version>1.0.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>karaf</artifactId>
+	<name>JContainer Manager :: Containers :: Apache Karaf</name>
+	<properties>
+		<version.osgi>5.0.0</version.osgi>
+		<version.karaf>4.0.0.M1</version.karaf>
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>${version.osgi}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.shell</groupId>
+			<artifactId>org.apache.karaf.shell.console</artifactId>
+			<version>${version.karaf}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf.jaas</groupId>
+			<artifactId>org.apache.karaf.jaas.modules</artifactId>
+			<version>${version.karaf}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.karaf</groupId>
+			<artifactId>org.apache.karaf.client</artifactId>
+			<version>${version.karaf}</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
