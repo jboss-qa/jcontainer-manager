@@ -1,5 +1,5 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
-		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.jboss.qa.jcontainer</groupId>
 	<artifactId>jcontainer-manager</artifactId>
@@ -17,6 +17,7 @@
 		<version.java>1.7</version.java>
 		<version.groovy>2.4.0</version.groovy>
 		<version.lombok>1.16.0</version.lombok>
+		<version.log4j>1.7.12</version.log4j>
 		<version.sshd>0.12.0</version.sshd>
 		<version.junit>4.12</version.junit>
 		<version.apache.commons>3.3.2</version.apache.commons>
@@ -54,6 +55,11 @@
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<version>${version.junit}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>${version.log4j}</version>
 		</dependency>
 	</dependencies>
 	<build>

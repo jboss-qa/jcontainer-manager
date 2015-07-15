@@ -13,46 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.fuse.test;
+package org.jboss.qa.jcontainer.eap.test;
 
-import org.jboss.qa.jcontainer.fuse.FuseClient;
-import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
-import org.jboss.qa.jcontainer.fuse.FuseContainer;
-import org.jboss.qa.jcontainer.fuse.FuseUser;
-import org.jboss.qa.jcontainer.karaf.KarafContainerManagementPortTest;
+import org.jboss.qa.jcontainer.eap.EapClient;
+import org.jboss.qa.jcontainer.eap.EapConfiguration;
+import org.jboss.qa.jcontainer.eap.EapContainer;
+import org.jboss.qa.jcontainer.eap.EapUser;
+import org.jboss.qa.jcontainer.wildfly.test.WildflyContainerTest;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-@RunWith(JUnit4.class)
-public class FuseContainerManagementPortTest extends KarafContainerManagementPortTest {
+import lombok.extern.slf4j.Slf4j;
 
-	public static final String FUSE_HOME = getProperty("fuse.home");
+@Slf4j
+@RunWith(JUnit4.class)
+public class EapContainerPortTest extends WildflyContainerTest {
+
+	public static final String EAP_HOME = getProperty("eap.home");
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		final FuseConfiguration conf = FuseConfiguration.builder()
-				.sshPort(MANAGEMENT_PORT).directory(FUSE_HOME).xmx("2g").build();
-		container = new FuseContainer<>(conf);
-		final FuseUser user = new FuseUser();
+		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).xmx("2g")
+				.managementNativePort(9998).build();
+		container = new EapContainer<>(conf);
+		final EapUser user = new EapUser();
 		user.setUsername(conf.getUsername());
 		user.setPassword(conf.getPassword());
-		user.addRoles("admin", "SuperUser");
+		user.setRealm(EapUser.Realm.MANAGEMENT_REALM);
+		user.addRoles("role1", "role2");
 		container.addUser(user);
 		container.start();
+	}
+
+	@AfterClass
+	public static void afterClass() throws Exception {
+		if (container != null) {
+			container.stop();
+		}
 	}
 
 	@Test
 	@Override
 	public void standaloneClientTest() throws Exception {
-		try (FuseClient client = new FuseClient<>(FuseConfiguration.builder()
-				.sshPort(MANAGEMENT_PORT).build())) {
+		try (EapClient client = new EapClient<>(EapConfiguration.builder().managementNativePort(9998).build())) {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}
 	}
 }
-

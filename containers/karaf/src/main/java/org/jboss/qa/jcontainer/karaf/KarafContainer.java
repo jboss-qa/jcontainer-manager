@@ -51,8 +51,8 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		}
 	}
 
-	protected void setEtcProperty(String key, Object value, String file) throws Exception {
-		final File propsFile = new File(configuration.getDirectory(), "etc" + File.separator + file);
+	protected void setEtcProperty(String key, Object value, String config) throws Exception {
+		final File propsFile = getConfigFile(config);
 		final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
 		propConf.setProperty(key, value);
 		propConf.save();
@@ -69,7 +69,7 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 					setEnvFile.getName(), setEnvBacFile.getName());
 		}
 		if (getConfiguration().getSshPort() != KarafConfiguration.DEFAULT_SSH_PORT) {
-			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell.cfg");
+			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell");
 		}
 		super.start();
 	}

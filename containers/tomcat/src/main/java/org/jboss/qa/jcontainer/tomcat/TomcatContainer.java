@@ -30,6 +30,10 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -43,6 +47,32 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 
 	public TomcatContainer(T configuration) {
 		super(configuration);
+		configureServer();
+	}
+
+	protected void configureServer() {
+		try {
+			final File file = new File(configuration.getDirectory(), "conf" + File.separator + "server.xml");
+			final DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			final DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			final Document doc = docBuilder.parse(file);
+
+			final XPathFactory xPathfactory = XPathFactory.newInstance();
+			final XPath xpath = xPathfactory.newXPath();
+			final XPathExpression expr = xpath.compile("/Server/Service/Connector[@protocol='HTTP/1.1']");
+
+			final Node node = (Node) expr.evaluate(doc, XPathConstants.NODE);
+			node.getAttributes().getNamedItem("port").setNodeValue(Integer.toString(configuration.getHttpPort()));
+
+			// Write the content into xml file
+			final TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			final Transformer transformer = transformerFactory.newTransformer();
+			final DOMSource source = new DOMSource(doc);
+			final StreamResult result = new StreamResult(file);
+			transformer.transform(source, result);
+		} catch (Exception e) {
+			log.error("Ports was not configured", e);
+		}
 	}
 
 	@Override
