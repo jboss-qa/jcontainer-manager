@@ -27,16 +27,14 @@ import org.junit.runners.JUnit4;
 import java.io.File;
 
 @RunWith(JUnit4.class)
-public class KarafContainerManagementPortTest extends KarafContainerTest {
+public class KarafContainerPortTest extends BaseKarafContainerTest {
 
-	protected static final Integer MANAGEMENT_PORT = 8102;
-
-	protected static KarafContainer container;
+	protected static final int SSH_PORT = 8102;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		final KarafConfiguration conf = KarafConfiguration.builder()
-				.sshPort(MANAGEMENT_PORT).directory(KARAF_HOME).xmx("2g").build();
+		final KarafConfiguration conf = KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g")
+				.sshPort(SSH_PORT).build();
 		container = new KarafContainer<>(conf);
 		final KarafUser user = new KarafUser();
 		user.setUsername(conf.getUsername());
@@ -50,8 +48,7 @@ public class KarafContainerManagementPortTest extends KarafContainerTest {
 	public static void afterClass() throws Exception {
 		if (container != null) {
 			container.stop();
-			final File propsFile = new File(container.getConfiguration().getDirectory(),
-					"etc" + File.separator + "org.apache.karaf.shell.cfg");
+			final File propsFile = container.getConfigFile("org.apache.karaf.shell");
 			final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
 			propConf.setProperty("sshPort", KarafConfiguration.DEFAULT_SSH_PORT);
 			propConf.save();
@@ -60,8 +57,7 @@ public class KarafContainerManagementPortTest extends KarafContainerTest {
 
 	@Test
 	public void standaloneClientTest() throws Exception {
-		try (KarafClient client = new KarafClient<>(KarafConfiguration.builder()
-				.sshPort(MANAGEMENT_PORT).build())) {
+		try (KarafClient client = new KarafClient<>(KarafConfiguration.builder().sshPort(SSH_PORT).build())) {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}

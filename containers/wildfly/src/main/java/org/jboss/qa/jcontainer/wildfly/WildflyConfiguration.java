@@ -179,6 +179,8 @@ public class WildflyConfiguration extends Configuration {
 			}
 			javaOpts.append(" -Djava.net.preferIPv4Stack=true");
 			javaOpts.append(" -Djava.awt.headless=true");
+			javaOpts.append(" -Djboss.management.http.port=" + managementPort);
+			javaOpts.append(" -Djboss.http.port=" + httpPort);
 			envProps.put("JAVA_OPTS", javaOpts.toString());
 
 			return new WildflyConfiguration(this);

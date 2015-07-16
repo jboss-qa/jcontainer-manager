@@ -19,10 +19,17 @@ import org.jboss.qa.jcontainer.wildfly.WildflyConfiguration;
 
 public class EapConfiguration extends WildflyConfiguration {
 
-	public static final int DEFAULT_MANAGEMENT_PORT = 9999;
+	public static final int DEFAULT_MANAGEMENT_NATIVE_PORT = 9999;
+
+	protected int managementNativePort;
 
 	public EapConfiguration(Builder<?> builder) {
 		super(builder);
+		managementNativePort = builder.managementNativePort;
+	}
+
+	public int getManagementNativePort() {
+		return managementNativePort;
 	}
 
 	public static Builder<?> builder() {
@@ -31,12 +38,23 @@ public class EapConfiguration extends WildflyConfiguration {
 
 	public abstract static class Builder<T extends Builder<T>> extends WildflyConfiguration.Builder<T> {
 
+		protected int managementNativePort;
+
 		public Builder() {
-			managementPort = DEFAULT_MANAGEMENT_PORT;
+			this.managementNativePort = DEFAULT_MANAGEMENT_NATIVE_PORT;
+		}
+
+		public T managementNativePort(int managementNativePort) {
+			this.managementNativePort = managementNativePort;
+			return self();
 		}
 
 		public EapConfiguration build() {
 			super.build();
+			// Set JAVA_OPTS
+			final StringBuffer javaOpts = new StringBuffer(envProps.get("JAVA_OPTS"));
+			javaOpts.append(" -Djboss.management.native.port=" + managementNativePort);
+			envProps.put("JAVA_OPTS", javaOpts.toString());
 			return new EapConfiguration(this);
 		}
 	}
