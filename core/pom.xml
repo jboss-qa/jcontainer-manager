@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>org.jboss.qa.jcontainer</groupId>
 		<artifactId>jcontainer-manager-parent</artifactId>
-		<version>1.0.0.RC3</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.jboss.qa.jcontainer</groupId>
 	<artifactId>core</artifactId>
