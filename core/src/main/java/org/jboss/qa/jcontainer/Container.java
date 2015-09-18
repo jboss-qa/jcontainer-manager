@@ -70,6 +70,13 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		client = createClient(configuration);
 	}
 
+	/**
+	 * Returns command, which can be used by client.
+	 *
+	 * @return String command if client is supported, NULL otherwise
+	 */
+	protected abstract String getBasicCommand();
+
 	public abstract void addUser(V user) throws Exception;
 
 	public synchronized void start() throws Exception {
@@ -93,15 +100,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		processBuilder.environment().putAll(configuration.getEnvProps());
 
 		final Process process = processBuilder.start();
-		int attempts = 30;
-		while (!checkSocket()) {
-			if (--attempts <= 0) {
-				throw new IllegalStateException("Container was not started");
-			}
-			Thread.sleep(TimeUnit.SECONDS.toMillis(5));
-			log.info("Waiting for container...");
-		}
-		log.info("Container was started");
+		waitForStarted();
 		shutdownThread = new Thread(new Runnable() {
 			public void run() {
 				if (process != null) {
@@ -144,6 +143,41 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	public boolean isRunning() throws Exception {
 		return shutdownThread != null;
+	}
+
+	protected synchronized void waitForStarted() throws InterruptedException {
+		int attempts = 30;
+		while (!checkSocket()) {
+			if (--attempts <= 0) {
+				throw new IllegalStateException("Container was not started");
+			}
+			Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+			log.info("Waiting for container...");
+		}
+		checkClient();
+		log.info("Container was started");
+	}
+
+	public void checkClient() {
+		if (isClientSupported()) {
+			final int clientAttempts = 20;
+			final String basicCommand = getBasicCommand();
+			for (int i = 0; i < clientAttempts; i++) {
+				try {
+					Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+					client.execute(basicCommand);
+					log.debug("Client was connected to container");
+					return;
+				} catch (Exception e) {
+					log.debug("Waiting for client...");
+				}
+			}
+			throw new IllegalStateException("Client was not connected to container");
+		}
+	}
+
+	public boolean isClientSupported() {
+		return getBasicCommand() != null;
 	}
 
 	public synchronized boolean checkSocket() {

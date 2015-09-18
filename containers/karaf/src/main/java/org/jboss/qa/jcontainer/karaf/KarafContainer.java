@@ -77,4 +77,9 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 	public File getConfigFile(String name) {
 		return new File(configuration.getDirectory(), String.format("etc%s%s.cfg", File.separator, name));
 	}
+
+	@Override
+	protected String getBasicCommand() {
+		return "version";
+	}
 }
