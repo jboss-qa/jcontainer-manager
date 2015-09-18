@@ -20,6 +20,7 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.wildfly.utils.CoreUtils;
 
 import java.io.File;
 
@@ -60,5 +61,10 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 	@Override
 	protected String getBasicCommand() {
 		return ":whoami";
+	}
+
+	@Override
+	public String getLogDirInternal() throws Exception {
+		return CoreUtils.getSystemProperty(client, "jboss.server.log.dir");
 	}
 }

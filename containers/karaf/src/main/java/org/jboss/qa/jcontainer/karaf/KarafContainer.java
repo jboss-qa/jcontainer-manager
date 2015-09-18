@@ -21,6 +21,7 @@ import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -81,5 +82,10 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 	@Override
 	protected String getBasicCommand() {
 		return "version";
+	}
+
+	@Override
+	protected String getLogDirInternal() throws Exception {
+		return CoreUtils.getSystemProperty(client, "karaf.data") + File.separator + "log" + File.separator;
 	}
 }
