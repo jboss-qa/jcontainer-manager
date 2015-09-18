@@ -18,9 +18,14 @@ package org.jboss.qa.jcontainer;
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.Closeable;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -34,9 +39,11 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 		private volatile boolean stop;
 		private volatile Process process;
+		private volatile File logFile;
 
-		public ContainerLogger(Process process) {
+		public ContainerLogger(File logFile, Process process) {
 			this.process = process;
+			this.logFile = logFile;
 		}
 
 		private void stop() {
@@ -45,15 +52,25 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 		@Override
 		public void run() {
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				while (!stop && reader.readLine() != null) { // ends with server shutdown
+			try (Writer fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile),
+					"utf-8"))) {
+				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+					String line = null;
+					final String newLine = System.getProperty("line.separator");
+					while (!stop && ((line = reader.readLine()) != null)) { // ends with server shutdown
+						fileWriter.write(line + newLine);
+						fileWriter.flush();
+					}
+				} catch (Exception e) {
+					// stream closed
 				}
-				reader.close();
 			} catch (Exception e) {
-				// stream closed
+				throw new IllegalStateException("Failed to write container standard output", e);
 			}
 		}
 	}
+
+	public static final String STDOUT_LOG_FILE_NAME = "stdout.log";
 
 	protected T configuration;
 	protected U client;
@@ -77,7 +94,26 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	 */
 	protected abstract String getBasicCommand();
 
+	/**
+	 * Returns log directory represented by string path.
+	 *
+	 * @return String with log directory path
+	 */
+	public String getLogDir() {
+		try {
+			return getLogDirInternal();
+		} catch (Exception e) {
+			throw new IllegalStateException("Log directory was not found", e);
+		}
+	}
+
+	protected abstract String getLogDirInternal() throws Exception;
+
 	public abstract void addUser(V user) throws Exception;
+
+	public File getStdoutLogFile() {
+		return new File(getLogDir(), STDOUT_LOG_FILE_NAME);
+	}
 
 	public synchronized void start() throws Exception {
 		if (isRunning()) {
@@ -116,7 +152,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		});
 
 		// Consume container stream
-		containerLogger = new ContainerLogger(process);
+		containerLogger = new ContainerLogger(getStdoutLogFile(), process);
 		new Thread(containerLogger).start();
 		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
