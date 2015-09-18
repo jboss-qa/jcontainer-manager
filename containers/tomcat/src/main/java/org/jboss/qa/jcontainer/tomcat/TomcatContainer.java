@@ -145,4 +145,9 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 		p.waitFor();
 		log.info("Container was stopped");
 	}
+
+	@Override
+	protected String getBasicCommand() {
+		return null;
+	}
 }

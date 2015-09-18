@@ -56,4 +56,9 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 		propConfRoles.setProperty(user.getUsername(), StringUtils.join(user.getRoles(), ","));
 		propConfRoles.save();
 	}
+
+	@Override
+	protected String getBasicCommand() {
+		return ":whoami";
+	}
 }
