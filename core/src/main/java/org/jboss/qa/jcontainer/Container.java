@@ -112,7 +112,11 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	public abstract void addUser(V user) throws Exception;
 
 	public File getStdoutLogFile() {
-		return new File(getLogDir(), STDOUT_LOG_FILE_NAME);
+		final File logDirectory = new File(getLogDir());
+		if(!logDirectory.exists()){
+			logDirectory.mkdirs();
+		}
+		return new File(logDirectory, STDOUT_LOG_FILE_NAME);
 	}
 
 	public synchronized void start() throws Exception {
