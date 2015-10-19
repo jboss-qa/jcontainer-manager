@@ -28,6 +28,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
@@ -161,10 +164,16 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		if (isRunning()) {
 			client.close();
 			Runtime.getRuntime().removeShutdownHook(shutdownThread);
-			shutdownThread.start();
-			shutdownThread.join();
+			final ExecutorService service = Executors.newSingleThreadExecutor();
+			final Future future = service.submit(shutdownThread);
+			service.shutdown();
+			if (!service.awaitTermination(1, TimeUnit.MINUTES)) {
+				future.cancel(true);
+				log.error("Container shutdown thread didn't finish in 1 minute!");
+			} else {
+				log.info("Container was stopped");
+			}
 			shutdownThread = null;
-			log.info("Container was stopped");
 		}
 	}
 
