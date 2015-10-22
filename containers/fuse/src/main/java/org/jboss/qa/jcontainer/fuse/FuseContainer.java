@@ -16,11 +16,23 @@
 package org.jboss.qa.jcontainer.fuse;
 
 import org.jboss.qa.jcontainer.karaf.KarafContainer;
+import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
 
+import java.io.File;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class FuseContainer<T extends FuseConfiguration, U extends FuseClient<T>, V extends FuseUser>
 		extends KarafContainer<T, U, V> {
 
 	public FuseContainer(T configuration) {
 		super(configuration);
 	}
+
+	@Override
+	protected String getLogDirInternal() throws Exception {
+		return CoreUtils.getSystemProperty(client, "karaf.data", "dev:system-property") + File.separator + "log" + File.separator;
+	}
 }
+

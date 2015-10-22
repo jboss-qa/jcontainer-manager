@@ -33,10 +33,12 @@ public class KarafConfiguration extends Configuration {
 	protected final int sshPort;
 	protected final File keyFile;
 	protected final File script;
+	protected final File stopScript;
 
 	protected KarafConfiguration(Builder<?> builder) {
 		super(builder);
 		script = builder.script;
+		stopScript = builder.stopScript;
 		httpPort = builder.httpPort;
 		sshPort = builder.sshPort;
 		//Optional
@@ -61,6 +63,14 @@ public class KarafConfiguration extends Configuration {
 
 	@Override
 	public List<String> generateCommand() {
+		return generateCommand(script);
+	}
+
+	public List<String> generateStopCommand() {
+		return generateCommand(stopScript);
+	}
+
+	public List<String> generateCommand(File script) {
 		if (!script.exists()) {
 			throw new IllegalStateException(String.format("Script '%s' does not exist", script.getAbsolutePath()));
 		}
@@ -86,6 +96,7 @@ public class KarafConfiguration extends Configuration {
 		protected int sshPort;
 		protected File keyFile;
 		protected File script;
+		protected File stopScript;
 
 		public Builder() {
 			xms = "128m";
@@ -112,7 +123,8 @@ public class KarafConfiguration extends Configuration {
 		}
 
 		public KarafConfiguration build() {
-			script = new File(directory, "bin" + File.separator + (SystemUtils.IS_OS_WINDOWS ? "karaf.bat" : "karaf"));
+			script = new File(directory, "bin/" + (SystemUtils.IS_OS_WINDOWS ? "start.bat" : "start"));
+			stopScript = new File(directory, "bin/" + (SystemUtils.IS_OS_WINDOWS ? "stop.bat" : "stop"));
 			if (!StringUtils.isEmpty(xms)) {
 				envProps.put("JAVA_MIN_MEM", xms);
 			}

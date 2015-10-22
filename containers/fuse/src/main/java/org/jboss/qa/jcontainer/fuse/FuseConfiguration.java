@@ -15,11 +15,7 @@
  */
 package org.jboss.qa.jcontainer.fuse;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import org.jboss.qa.jcontainer.karaf.KarafConfiguration;
-
-import java.io.File;
 
 public class FuseConfiguration extends KarafConfiguration {
 
@@ -44,7 +40,6 @@ public class FuseConfiguration extends KarafConfiguration {
 
 		public FuseConfiguration build() {
 			super.build();
-			script = new File(directory, "/bin/" + (SystemUtils.IS_OS_WINDOWS ? "fuse.bat" : "fuse"));
 			return new FuseConfiguration(this);
 		}
 	}
