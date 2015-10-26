@@ -17,15 +17,9 @@ package org.jboss.qa.jcontainer;
 
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,56 +33,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class Container<T extends Configuration, U extends Client<T>, V extends User> implements Closeable {
 
-	private static class ContainerLogger implements Runnable {
-
-		private volatile boolean stop;
-		private volatile Process process;
-		private volatile File logFile;
-
-		public ContainerLogger(File logFile, Process process) {
-			this.process = process;
-			this.logFile = logFile;
-		}
-
-		private void stop() {
-			stop = true;
-		}
-
-		@Override
-		public void run() {
-			try (Writer fileWriter = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(logFile),
-					"utf-8"))) {
-				try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-					String line = null;
-					final String newLine = System.getProperty("line.separator");
-					while (!stop && ((line = reader.readLine()) != null)) { // ends with server shutdown
-						fileWriter.write(line + newLine);
-						fileWriter.flush();
-					}
-				} catch (Exception e) {
-					// stream closed
-				}
-			} catch (Exception e) {
-				throw new IllegalStateException("Failed to write container standard output", e);
-			}
-		}
-	}
-
-	public static final String STDOUT_LOG_FILE_NAME = "stdout.log";
-
 	protected T configuration;
 	protected U client;
 
+	private final long id;
+	private final File stdoutLogFile;
 	private Class<T> confClass;
 	private Class<U> clientClass;
 	private volatile List<Thread> shutdownHooks = new ArrayList<>();
-	private ContainerLogger containerLogger;
 
 	public Container(T configuration) {
+		id = System.nanoTime();
+		stdoutLogFile = new File(configuration.getDirectory(), String.format("stdout-%s.log", id));
 		confClass = ReflectionUtils.getGenericClass(getClass(), 0);
 		clientClass = ReflectionUtils.getGenericClass(getClass(), 1);
 		this.configuration = configuration;
 		client = createClient(configuration);
+		log.info("container id = {}", id);
+	}
+
+	public long getId() {
+		return id;
+	}
+
+	public File getStdoutLogFile() {
+		return stdoutLogFile;
 	}
 
 	/**
@@ -120,10 +89,6 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	public abstract void addUser(V user) throws Exception;
 
-	public File getStdoutLogFile() {
-		return new File(getLogDir(), STDOUT_LOG_FILE_NAME);
-	}
-
 	public synchronized void start() throws Exception {
 		if (isRunning()) {
 			log.warn("Container is already started");
@@ -143,13 +108,14 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
 		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
+		processBuilder.redirectErrorStream(true);
+		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(getStdoutLogFile()));
 
 		final Process process = processBuilder.start();
 		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				if (process != null) {
 					process.destroy();
-					containerLogger.stop();
 					try {
 						process.waitFor();
 					} catch (InterruptedException e) {
@@ -159,10 +125,6 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 			}
 		}));
 		waitForStarted();
-
-		// Consume container stream
-		containerLogger = new ContainerLogger(getStdoutLogFile(), process);
-		new Thread(containerLogger).start();
 	}
 
 	public synchronized void stop(long timeout, TimeUnit timeUnit) throws Exception {
