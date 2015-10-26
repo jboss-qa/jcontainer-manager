@@ -33,6 +33,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class Container<T extends Configuration, U extends Client<T>, V extends User> implements Closeable {
 
+	public static final String JCONTAINER_ID = "jcontainer.id";
+
 	protected T configuration;
 	protected U client;
 
@@ -108,6 +110,8 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
 		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
+		processBuilder.environment().put("JAVA_OPTS",
+				String.format("%s -D%s=%s", processBuilder.environment().get("JAVA_OPTS"), JCONTAINER_ID, id));
 		processBuilder.redirectErrorStream(true);
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(getStdoutLogFile()));
 

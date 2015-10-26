@@ -18,8 +18,10 @@ package org.jboss.qa.jcontainer.wildfly;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.util.ProcessUtils;
 import org.jboss.qa.jcontainer.wildfly.utils.CoreUtils;
 
 import java.io.File;
@@ -61,6 +63,18 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 	@Override
 	protected String getBasicCommand() {
 		return ":whoami";
+	}
+
+	@Override
+	public synchronized void start() throws Exception {
+		super.start();
+		if (SystemUtils.IS_OS_WINDOWS) { // JDK-4770092 - http://goo.gl/Aqc9cl
+			addShutdownHook(new Thread(new Runnable() {
+				public void run() {
+					ProcessUtils.killJavaByContainerId(getId());
+				}
+			}));
+		}
 	}
 
 	@Override
