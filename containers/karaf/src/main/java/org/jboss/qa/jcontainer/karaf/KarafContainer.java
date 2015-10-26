@@ -73,6 +73,18 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell");
 		}
 		super.start();
+		addShutdownHook(new Thread(new Runnable() {
+			public void run() {
+				try {
+					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
+					processBuilder.inheritIO();
+					final Process p = processBuilder.start();
+					p.waitFor();
+				} catch (Exception e) {
+					throw new IllegalStateException("Karaf container was not stopped", e);
+				}
+			}
+		}));
 	}
 
 	public File getConfigFile(String name) {

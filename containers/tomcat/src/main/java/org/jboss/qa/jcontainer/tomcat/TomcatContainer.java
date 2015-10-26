@@ -139,11 +139,21 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 	}
 
 	@Override
-	public synchronized void stop() throws Exception {
-		final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
-		final Process p = processBuilder.start();
-		p.waitFor();
-		log.info("Container was stopped");
+	public synchronized void start() throws Exception {
+		super.start();
+		addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
+					processBuilder.inheritIO();
+					final Process p = processBuilder.start();
+					p.waitFor();
+				} catch (Exception e) {
+					throw new IllegalStateException("Tomcat container was not stopped", e);
+				}
+			}
+		}));
 	}
 
 	@Override

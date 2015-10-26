@@ -27,6 +27,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -80,7 +81,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	private Class<T> confClass;
 	private Class<U> clientClass;
-	private volatile Thread shutdownThread;
+	private volatile List<Thread> shutdownHooks = new ArrayList<>();
 	private ContainerLogger containerLogger;
 
 	public Container(T configuration) {
@@ -112,6 +113,11 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 
 	protected abstract String getLogDirInternal() throws Exception;
 
+	protected void addShutdownHook(Thread hook) {
+		shutdownHooks.add(hook);
+		Runtime.getRuntime().addShutdownHook(hook);
+	}
+
 	public abstract void addUser(V user) throws Exception;
 
 	public File getStdoutLogFile() {
@@ -139,8 +145,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		processBuilder.environment().putAll(configuration.getEnvProps());
 
 		final Process process = processBuilder.start();
-		waitForStarted();
-		shutdownThread = new Thread(new Runnable() {
+		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				if (process != null) {
 					process.destroy();
@@ -152,29 +157,38 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 					}
 				}
 			}
-		});
+		}));
+		waitForStarted();
 
 		// Consume container stream
 		containerLogger = new ContainerLogger(getStdoutLogFile(), process);
 		new Thread(containerLogger).start();
-		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
-	public synchronized void stop() throws Exception {
+	public synchronized void stop(long timeout, TimeUnit timeUnit) throws Exception {
 		if (isRunning()) {
 			client.close();
-			Runtime.getRuntime().removeShutdownHook(shutdownThread);
-			final ExecutorService service = Executors.newSingleThreadExecutor();
-			final Future future = service.submit(shutdownThread);
+			final ExecutorService service = Executors.newCachedThreadPool();
+			final List<Future> futures = new ArrayList<>();
+			for (Thread shutdownHook : shutdownHooks) {
+				Runtime.getRuntime().removeShutdownHook(shutdownHook);
+				futures.add(service.submit(shutdownHook));
+			}
 			service.shutdown();
-			if (!service.awaitTermination(1, TimeUnit.MINUTES)) {
-				future.cancel(true);
-				log.error("Container shutdown thread didn't finish in 1 minute!");
+			if (!service.awaitTermination(timeout, timeUnit)) {
+				for (Future future : futures) {
+					future.cancel(true);
+				}
+				log.error("Container shutdown process didn't finish in {} {}!", timeout, timeUnit);
 			} else {
 				log.info("Container was stopped");
 			}
-			shutdownThread = null;
+			shutdownHooks.clear();
 		}
+	}
+
+	public synchronized void stop() throws Exception {
+		stop(1, TimeUnit.MINUTES);
 	}
 
 	@Override
@@ -187,7 +201,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	}
 
 	public boolean isRunning() throws Exception {
-		return shutdownThread != null;
+		return !shutdownHooks.isEmpty();
 	}
 
 	protected synchronized void waitForStarted() throws InterruptedException {
