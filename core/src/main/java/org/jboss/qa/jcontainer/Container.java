@@ -110,8 +110,16 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		final ProcessBuilder processBuilder = new ProcessBuilder(cmd);
 		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
-		processBuilder.environment().put("JAVA_OPTS",
-				String.format("%s -D%s=%s", processBuilder.environment().get("JAVA_OPTS"), JCONTAINER_ID, id));
+
+		// Modify JAVA_OPTS
+		final StringBuilder javaOpts = new StringBuilder();
+		final String oldJavaOpts = processBuilder.environment().get("JAVA_OPTS");
+		if (oldJavaOpts != null) {
+			javaOpts.append(processBuilder.environment().get("JAVA_OPTS"));
+		}
+		javaOpts.append(String.format(" -D%s=%s", JCONTAINER_ID, id));
+		processBuilder.environment().put("JAVA_OPTS", javaOpts.toString());
+
 		processBuilder.redirectErrorStream(true);
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(getStdoutLogFile()));
 
