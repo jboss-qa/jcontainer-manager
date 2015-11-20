@@ -60,15 +60,23 @@ public final class ProcessUtils {
 	public static String getJavaPidByContainerId(long id) {
 		String result = null;
 		try {
+			final Long currentPid = PidUtils.getPID();
 			for (Map.Entry<String, String> entry : getJavaProcesses().entrySet()) {
 				final String pid = entry.getKey();
-				final Process p = Runtime.getRuntime().exec("jinfo -sysprops " + pid);
+				if (currentPid != null && String.valueOf(currentPid).equals(pid)) {
+					//it hangs jvm on Windows
+					log.debug("We are not going to execute jinfo for our pid " + currentPid);
+					continue;
+				}
+				final String command = "jinfo -sysprops " + pid;
+				log.info("Executing: " + command);
+				final Process p = Runtime.getRuntime().exec(command);
 				final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				String line;
 				while ((line = is.readLine()) != null) {
-					if (line.contains(Container.JCONTAINER_ID) && line.contains(String.valueOf(id))) {
+					if (result == null && line.contains(Container.JCONTAINER_ID) && line.contains(String.valueOf(id))) {
 						result = pid;
-						break;
+						//Don't break it here. We need to consume whole STDOUT of executed command.
 					}
 				}
 				final int exitValue = p.waitFor();
@@ -112,6 +120,13 @@ public final class ProcessUtils {
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
+			}
+
+			try {
+				//Give some time to kill. Sometimes I got an error message like "port 8080 is alreagy opened" on Windows machine when didn't wait here.
+				Thread.sleep(15 * 1000L);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
 			}
 		}
 	}
