@@ -15,15 +15,25 @@
  */
 package org.jboss.qa.jcontainer.wildfly;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.Configuration;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class WildflyConfiguration extends Configuration {
 
 	public static final int DEFAULT_HTTP_PORT = 8080;
@@ -117,11 +127,16 @@ public class WildflyConfiguration extends Configuration {
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+
+		private static final String EXTRA_JAVA_OPTS_SCRIPT_WIN = "wildflyExtraJavaOpts.conf.bat";
+		private static final String EXTRA_JAVA_OPTS_SCRIPT = "wildflyExtraJavaOpts.conf";
+
 		protected int httpPort;
 		protected int managementPort;
 		protected String profile;
 		protected Mode mode;
 		protected File script;
+		protected File scriptConf;
 
 		public Builder() {
 			xms = "1303m";
@@ -158,9 +173,13 @@ public class WildflyConfiguration extends Configuration {
 			if (mode.equals(Mode.STANDALONE)) {
 				script = new File(directory, "bin" + File.separator
 						+ (SystemUtils.IS_OS_WINDOWS ? "standalone.bat" : "standalone.sh"));
+				scriptConf = new File(directory, "bin" + File.separator
+						+ (SystemUtils.IS_OS_WINDOWS ? "standalone.conf.bat" : "standalone.conf"));
 			} else {
 				script = new File(directory, "bin" + File.separator
 						+ (SystemUtils.IS_OS_WINDOWS ? "domain.bat" : "domain.sh"));
+				scriptConf = new File(directory, "bin" + File.separator
+						+ (SystemUtils.IS_OS_WINDOWS ? "domain.conf.bat" : "domain.conf"));
 			}
 
 			// Set JAVA_OPTS
@@ -181,10 +200,60 @@ public class WildflyConfiguration extends Configuration {
 			javaOpts.append(" -Djava.awt.headless=true");
 			javaOpts.append(" -Djboss.management.http.port=" + managementPort);
 			javaOpts.append(" -Djboss.http.port=" + httpPort);
+			//true JAVA_OPTS (not EXTRA_JAVA_OPTS), because it could contain -Xmx etc...
 			envProps.put("JAVA_OPTS", javaOpts.toString());
 
+			try {
+				addExtraJavaOptsIntoScriptConf();
+			} catch (final IOException e) {
+				log.error("Problem while adding EXTRA_JAVA_OPTS into " + scriptConf.getAbsolutePath(), e);
+			}
 			return new WildflyConfiguration(this);
 		}
+
+		/**
+		 * This will modify eap/wildfly conf script (standalone.conf[.bat]|domain.conf[.bat]) to use EXTRA_JAVA_OPTS env.
+		 */
+		private void addExtraJavaOptsIntoScriptConf() throws IOException {
+			if (!scriptConf.exists()) {
+				log.warn("Script conf file " + scriptConf.getAbsolutePath() + " does not exists.");
+				return;
+			}
+			if (!scriptConf.canRead()) {
+				log.warn("We could not read script conf file " + scriptConf.getAbsolutePath());
+				return;
+			}
+			if (hasExtraJavaOpts(scriptConf)) {
+				//already got EXTRA_JAVA_OPTS in the conf
+				return;
+			}
+
+			final String extraJavaOptsScript = loadExtraJavaOptsScript();
+			try (final PrintWriter w = new PrintWriter(new FileWriter(scriptConf, true))) {
+				w.println();
+				w.println(extraJavaOptsScript);
+			}
+		}
+
+		private static boolean hasExtraJavaOpts(final File file) throws IOException {
+			try (final BufferedReader r = new BufferedReader(new FileReader(file))) {
+				String line;
+				while ((line = r.readLine()) != null) {
+					if (line.contains(EXTRA_JAVA_OPTS_ENV_NAME)) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		private String loadExtraJavaOptsScript() throws IOException {
+			final String resourceName = SystemUtils.IS_OS_WINDOWS ? EXTRA_JAVA_OPTS_SCRIPT_WIN : EXTRA_JAVA_OPTS_SCRIPT;
+			try (final InputStream in = this.getClass().getClassLoader().getResourceAsStream(resourceName)) {
+				return IOUtils.toString(in);
+			}
+		}
+
 	}
 
 	private static class Builder2 extends Builder<Builder2> {

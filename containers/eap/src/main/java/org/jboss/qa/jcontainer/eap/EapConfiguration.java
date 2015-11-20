@@ -51,10 +51,14 @@ public class EapConfiguration extends WildflyConfiguration {
 
 		public EapConfiguration build() {
 			super.build();
-			// Set JAVA_OPTS
-			final StringBuffer javaOpts = new StringBuffer(envProps.get("JAVA_OPTS"));
-			javaOpts.append(" -Djboss.management.native.port=" + managementNativePort);
-			envProps.put("JAVA_OPTS", javaOpts.toString());
+			// Set EXTRA_JAVA_OPTS
+			final StringBuilder extraJavaOpts = new StringBuilder();
+			final String oldExtraJavaOpts = envProps.get(EXTRA_JAVA_OPTS_ENV_NAME);
+			if (oldExtraJavaOpts != null) {
+				extraJavaOpts.append(oldExtraJavaOpts);
+			}
+			extraJavaOpts.append(" -Djboss.management.native.port=").append(managementNativePort);
+			envProps.put(EXTRA_JAVA_OPTS_ENV_NAME, extraJavaOpts.toString());
 			return new EapConfiguration(this);
 		}
 	}

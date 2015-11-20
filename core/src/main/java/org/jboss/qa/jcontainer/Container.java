@@ -111,14 +111,15 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		processBuilder.environment().putAll(System.getenv());
 		processBuilder.environment().putAll(configuration.getEnvProps());
 
-		// Modify JAVA_OPTS
-		final StringBuilder javaOpts = new StringBuilder();
-		final String oldJavaOpts = processBuilder.environment().get("JAVA_OPTS");
-		if (oldJavaOpts != null) {
-			javaOpts.append(processBuilder.environment().get("JAVA_OPTS"));
+		// Modify EXTRA_JAVA_OPTS
+		final String extraJavaOptsEnvName = configuration.getExtraJavaOptsEnvName();
+		final StringBuilder extraJavaOpts = new StringBuilder();
+		final String oldExtraJavaOpts = processBuilder.environment().get(extraJavaOptsEnvName);
+		if (oldExtraJavaOpts != null) {
+			extraJavaOpts.append(oldExtraJavaOpts);
 		}
-		javaOpts.append(String.format(" -D%s=%s", JCONTAINER_ID, id));
-		processBuilder.environment().put("JAVA_OPTS", javaOpts.toString());
+		extraJavaOpts.append(String.format(" -D%s=%s", JCONTAINER_ID, id));
+		processBuilder.environment().put(extraJavaOptsEnvName, extraJavaOpts.toString());
 
 		processBuilder.redirectErrorStream(true);
 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(getStdoutLogFile()));

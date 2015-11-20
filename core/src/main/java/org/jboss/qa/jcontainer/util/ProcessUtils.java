@@ -64,7 +64,7 @@ public final class ProcessUtils {
 			for (Map.Entry<String, String> entry : getJavaProcesses().entrySet()) {
 				final String pid = entry.getKey();
 				if (currentPid != null && String.valueOf(currentPid).equals(pid)) {
-					//it hangs jvm on Windows
+					//it freezes jvm on Windows
 					log.debug("We are not going to execute jinfo for our pid " + currentPid);
 					continue;
 				}
