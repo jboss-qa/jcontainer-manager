@@ -26,6 +26,8 @@ import java.util.List;
 
 public class TomcatConfiguration extends Configuration {
 
+	public static final String CATALINA_OPTS = "CATALINA_OPTS";
+
 	public static final int DEFAULT_HTTP_PORT = 8080;
 
 	protected final int httpPort;
@@ -41,6 +43,11 @@ public class TomcatConfiguration extends Configuration {
 
 	public int getHttpPort() {
 		return httpPort;
+	}
+
+	@Override
+	public String getExtraJavaOptsEnvName() {
+		return CATALINA_OPTS;
 	}
 
 	@Override
