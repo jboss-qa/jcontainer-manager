@@ -31,7 +31,7 @@ public class FuseConfiguration extends KarafConfiguration {
 
 		public Builder() {
 			xms = "512m";
-			xmx = "512m";
+			xmx = "1024m";
 			permSize = "128m";
 			maxPermSize = "256m";
 			username = "admin";

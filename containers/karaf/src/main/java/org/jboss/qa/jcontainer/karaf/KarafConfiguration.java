@@ -26,6 +26,8 @@ import java.util.List;
 
 public class KarafConfiguration extends Configuration {
 
+	public static final String KARAF_OPTS_ENV_NAME = "KARAF_OPTS";
+
 	public static final int DEFAULT_HTTP_PORT = 8181;
 	public static final int DEFAULT_SSH_PORT = 8101;
 
@@ -43,6 +45,11 @@ public class KarafConfiguration extends Configuration {
 		sshPort = builder.sshPort;
 		//Optional
 		keyFile = builder.keyFile;
+	}
+
+	@Override
+	public String getJavaOptsEnvName() {
+		return KARAF_OPTS_ENV_NAME;
 	}
 
 	public int getHttpPort() {
@@ -99,8 +106,6 @@ public class KarafConfiguration extends Configuration {
 		protected File stopScript;
 
 		public Builder() {
-			xms = "128m";
-			xmx = "512m";
 			httpPort = DEFAULT_HTTP_PORT;
 			sshPort = DEFAULT_SSH_PORT;
 			username = "karaf";
