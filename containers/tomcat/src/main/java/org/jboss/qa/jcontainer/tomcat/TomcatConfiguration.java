@@ -26,6 +26,8 @@ import java.util.List;
 
 public class TomcatConfiguration extends Configuration {
 
+	public static final String CATALINA_OPTS = "CATALINA_OPTS";
+
 	public static final int DEFAULT_HTTP_PORT = 8080;
 
 	protected final int httpPort;
@@ -41,6 +43,11 @@ public class TomcatConfiguration extends Configuration {
 
 	public int getHttpPort() {
 		return httpPort;
+	}
+
+	@Override
+	public String getJavaOptsEnvName() {
+		return CATALINA_OPTS;
 	}
 
 	@Override
@@ -99,7 +106,7 @@ public class TomcatConfiguration extends Configuration {
 			if (!StringUtils.isEmpty(maxPermSize)) {
 				catalinaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
 			}
-			envProps.put("CATALINA_OPTS", catalinaOpts.toString());
+			envProps.put(CATALINA_OPTS, catalinaOpts.toString());
 			return new TomcatConfiguration(this);
 		}
 	}

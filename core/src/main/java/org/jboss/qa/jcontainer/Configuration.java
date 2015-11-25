@@ -26,6 +26,8 @@ import java.util.Set;
 
 public abstract class Configuration {
 
+	public static final String JAVA_OPTS_ENV_NAME = "JAVA_OPTS";
+
 	protected final File directory;
 	protected final String host;
 	protected final Integer port;
@@ -53,6 +55,10 @@ public abstract class Configuration {
 		maxPermSize = builder.maxPermSize;
 		params = builder.params;
 		envProps = builder.envProps;
+	}
+
+	public String getJavaOptsEnvName() {
+		return JAVA_OPTS_ENV_NAME;
 	}
 
 	protected void checkMandatoryProperty(String name, Object value) {

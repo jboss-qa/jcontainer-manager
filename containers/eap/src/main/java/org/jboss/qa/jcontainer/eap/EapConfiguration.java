@@ -41,6 +41,9 @@ public class EapConfiguration extends WildflyConfiguration {
 		protected int managementNativePort;
 
 		public Builder() {
+			xms = "1303m";
+			xmx = "1303m";
+			maxPermSize = "256m";
 			this.managementNativePort = DEFAULT_MANAGEMENT_NATIVE_PORT;
 		}
 
@@ -52,9 +55,14 @@ public class EapConfiguration extends WildflyConfiguration {
 		public EapConfiguration build() {
 			super.build();
 			// Set JAVA_OPTS
-			final StringBuffer javaOpts = new StringBuffer(envProps.get("JAVA_OPTS"));
-			javaOpts.append(" -Djboss.management.native.port=" + managementNativePort);
-			envProps.put("JAVA_OPTS", javaOpts.toString());
+			final StringBuilder javaOpts = new StringBuilder();
+			final String oldJavaOpts = envProps.get(JAVA_OPTS_ENV_NAME);
+			if (oldJavaOpts != null) {
+				javaOpts.append(oldJavaOpts);
+			}
+			javaOpts.append(" -Djboss.modules.policy-permissions=true");
+			javaOpts.append(" -Djboss.management.native.port=").append(managementNativePort);
+			envProps.put(JAVA_OPTS_ENV_NAME, javaOpts.toString());
 			return new EapConfiguration(this);
 		}
 	}

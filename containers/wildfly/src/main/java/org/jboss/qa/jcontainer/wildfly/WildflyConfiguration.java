@@ -124,8 +124,8 @@ public class WildflyConfiguration extends Configuration {
 		protected File script;
 
 		public Builder() {
-			xms = "1303m";
-			xmx = "1303m";
+			xms = "64m";
+			xmx = "512m";
 			maxPermSize = "256m";
 			httpPort = DEFAULT_HTTP_PORT;
 			managementPort = DEFAULT_MANAGEMENT_PORT;
@@ -178,6 +178,7 @@ public class WildflyConfiguration extends Configuration {
 				javaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
 			}
 			javaOpts.append(" -Djava.net.preferIPv4Stack=true");
+			javaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
 			javaOpts.append(" -Djava.awt.headless=true");
 			javaOpts.append(" -Djboss.management.http.port=" + managementPort);
 			javaOpts.append(" -Djboss.http.port=" + httpPort);
