@@ -22,6 +22,7 @@ import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
 import org.jboss.qa.jcontainer.Container;
 import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
+import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import java.io.File;
 import java.util.HashMap;
@@ -77,9 +78,7 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 			public void run() {
 				try {
 					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
-					processBuilder.inheritIO();
-					final Process p = processBuilder.start();
-					p.waitFor();
+					ProcessBuilderExecutor.syncExecute(processBuilder);
 				} catch (Exception e) {
 					throw new IllegalStateException("Karaf container was not stopped", e);
 				}

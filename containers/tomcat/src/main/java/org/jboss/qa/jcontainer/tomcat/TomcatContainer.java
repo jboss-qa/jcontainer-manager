@@ -18,6 +18,7 @@ package org.jboss.qa.jcontainer.tomcat;
 import org.apache.commons.lang3.StringUtils;
 
 import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -146,9 +147,7 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 			public void run() {
 				try {
 					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
-					processBuilder.inheritIO();
-					final Process p = processBuilder.start();
-					p.waitFor();
+					ProcessBuilderExecutor.syncExecute(processBuilder);
 				} catch (Exception e) {
 					throw new IllegalStateException("Tomcat container was not stopped", e);
 				}
