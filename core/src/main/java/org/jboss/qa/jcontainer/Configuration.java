@@ -37,6 +37,7 @@ public abstract class Configuration {
 	protected final String xmx;
 	protected final String permSize;
 	protected final String maxPermSize;
+	protected final String logFileName;
 	protected final Set<String> params;
 	protected final Map<String, String> envProps;
 
@@ -46,6 +47,7 @@ public abstract class Configuration {
 		checkMandatoryProperty("port", port = builder.port);
 		checkMandatoryProperty("username", username = builder.username);
 		checkMandatoryProperty("password", password = builder.password);
+		checkMandatoryProperty("logFileName", logFileName = builder.logFileName);
 
 		// Optional properties
 		directory = builder.directory; // Mandatory for container but not for standalone client.
@@ -101,6 +103,10 @@ public abstract class Configuration {
 		return maxPermSize;
 	}
 
+	public String getLogFileName() {
+		return logFileName;
+	}
+
 	public Set<String> getParams() {
 		return params;
 	}
@@ -122,6 +128,7 @@ public abstract class Configuration {
 		protected String xmx;
 		protected String permSize;
 		protected String maxPermSize;
+		protected String logFileName;
 		protected Set<String> params;
 		protected Map<String, String> envProps;
 
@@ -178,6 +185,11 @@ public abstract class Configuration {
 
 		public T maxPermSize(String maxPermSize) {
 			this.maxPermSize = maxPermSize;
+			return self();
+		}
+
+		public T logFileName(String logFileName) {
+			this.logFileName = logFileName;
 			return self();
 		}
 

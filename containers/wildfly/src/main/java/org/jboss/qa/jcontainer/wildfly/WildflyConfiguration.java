@@ -131,6 +131,7 @@ public class WildflyConfiguration extends Configuration {
 			managementPort = DEFAULT_MANAGEMENT_PORT;
 			profile = "standalone.xml";
 			mode = Mode.STANDALONE;
+			logFileName = "server.log";
 		}
 
 		public T httpPort(int httpPort) {

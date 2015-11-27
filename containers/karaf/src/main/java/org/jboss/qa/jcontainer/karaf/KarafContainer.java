@@ -97,7 +97,7 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 	}
 
 	@Override
-	protected String getLogDirInternal() throws Exception {
-		return CoreUtils.getSystemProperty(client, "karaf.data") + File.separator + "log" + File.separator;
+	protected File getLogDirInternal() throws Exception {
+		return new File(CoreUtils.getSystemProperty(client, "karaf.data"), "log");
 	}
 }

@@ -31,8 +31,8 @@ public class FuseContainer<T extends FuseConfiguration, U extends FuseClient<T>,
 	}
 
 	@Override
-	protected String getLogDirInternal() throws Exception {
-		return CoreUtils.getSystemProperty(client, "karaf.data", "dev:system-property") + File.separator + "log" + File.separator;
+	protected File getLogDirInternal() throws Exception {
+		return new File(CoreUtils.getSystemProperty(client, "karaf.data", "dev:system-property"), "log");
 	}
 }
 

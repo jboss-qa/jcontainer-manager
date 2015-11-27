@@ -78,7 +78,7 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 	}
 
 	@Override
-	public String getLogDirInternal() throws Exception {
-		return CoreUtils.getSystemProperty(client, "jboss.server.log.dir");
+	public File getLogDirInternal() throws Exception {
+		return new File(CoreUtils.getSystemProperty(client, "jboss.server.log.dir"));
 	}
 }

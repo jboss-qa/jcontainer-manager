@@ -84,6 +84,7 @@ public class TomcatConfiguration extends Configuration {
 		public Builder() {
 			httpPort = DEFAULT_HTTP_PORT;
 			password = "";
+			logFileName = "catalina.out";
 		}
 
 		public T httpPort(int httpPort) {

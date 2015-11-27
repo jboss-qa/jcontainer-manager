@@ -60,4 +60,9 @@ public class TomcatContainerTest extends ContainerTest {
 	public void baseTest() throws Exception {
 		Assert.assertTrue(container.isRunning());
 	}
+
+	@Test
+	public void defaultLogFileTest() throws Exception {
+		Assert.assertTrue(container.getDefaultLogFile().exists());
+	}
 }

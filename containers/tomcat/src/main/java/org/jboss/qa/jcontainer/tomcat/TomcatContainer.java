@@ -162,12 +162,11 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 	}
 
 	@Override
-	protected String getLogDirInternal() throws Exception {
-		final String logDir = configuration.getDirectory() + File.separator + "logs";
-		final File logDirFile = new File(logDir);
-		if (!logDirFile.exists() && !logDirFile.mkdirs()) {
-			throw new IllegalStateException(String.format("Directory %s could not be created", logDir));
+	protected File getLogDirInternal() throws Exception {
+		final File logDir = new File(configuration.getDirectory(), "logs");
+		if (!logDir.exists() && !logDir.mkdirs()) {
+			throw new IllegalStateException(String.format("Directory %s could not be created", logDir.getAbsoluteFile()));
 		}
-		return logDir + File.separator;
+		return logDir;
 	}
 }

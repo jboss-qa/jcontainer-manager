@@ -101,5 +101,10 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 			Assert.assertNotNull(client.getCommandResult());
 		}
 	}
+
+	@Test
+	public void defaultLogFileTest() throws Exception {
+		Assert.assertTrue(container.getDefaultLogFile().exists());
+	}
 }
 
