@@ -16,6 +16,7 @@
 package org.jboss.qa.jcontainer;
 
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
+import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import java.io.Closeable;
 import java.io.File;
@@ -132,10 +133,8 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		javaOpts.append(String.format(" -D%s=%s", JCONTAINER_ID, id));
 		processBuilder.environment().put(javaOptsEnvName, javaOpts.toString());
 
-		processBuilder.redirectErrorStream(true);
-		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(getStdoutLogFile()));
+		final Process process = ProcessBuilderExecutor.asyncExecute(processBuilder, getStdoutLogFile());
 
-		final Process process = processBuilder.start();
 		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
 				if (process != null) {
