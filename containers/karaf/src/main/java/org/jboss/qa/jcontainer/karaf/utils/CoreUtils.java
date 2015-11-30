@@ -26,7 +26,7 @@ public final class CoreUtils {
 	public static String getSystemProperty(KarafClient client, String propertyName, String command) throws Exception {
 		client.execute(String.format("%s %s", command, propertyName));
 		final String property = client.getCommandResult().replaceAll("\u001B\\[[;\\d]*m", "");
-		return property.length() > 0 ? property.substring(0, property.length() - 1) : property;
+		return property.trim();
 	}
 
 	private CoreUtils() {
