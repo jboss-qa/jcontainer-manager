@@ -74,7 +74,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 	 *
 	 * @return String with log directory path
 	 */
-	public String getLogDir() {
+	public File getLogDir() {
 		try {
 			return getLogDirInternal();
 		} catch (Exception e) {
@@ -82,7 +82,18 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		}
 	}
 
-	protected abstract String getLogDirInternal() throws Exception;
+	/**
+	 * Returns default log file.
+	 */
+	public File getDefaultLogFile() {
+		final File logFile = new File(getLogDir(), configuration.getLogFileName());
+		if (!logFile.exists()) {
+			log.warn("Log file does not exist: {}", logFile.getAbsoluteFile());
+		}
+		return logFile;
+	}
+
+	protected abstract File getLogDirInternal() throws Exception;
 
 	protected void addShutdownHook(Thread hook) {
 		shutdownHooks.add(hook);

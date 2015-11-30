@@ -110,6 +110,7 @@ public class KarafConfiguration extends Configuration {
 			sshPort = DEFAULT_SSH_PORT;
 			username = "karaf";
 			password = "karaf";
+			logFileName = "karaf.log";
 		}
 
 		public T httpPort(int httpPort) {

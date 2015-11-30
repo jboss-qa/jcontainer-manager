@@ -36,6 +36,7 @@ public class FuseConfiguration extends KarafConfiguration {
 			maxPermSize = "256m";
 			username = "admin";
 			password = "admin";
+			logFileName = "fuse.log";
 		}
 
 		public FuseConfiguration build() {

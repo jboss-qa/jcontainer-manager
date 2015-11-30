@@ -127,4 +127,9 @@ public class WildflyContainerTest extends ContainerTest {
 			Assert.assertNotNull(client.getCommandResult());
 		}
 	}
+
+	@Test
+	public void defaultLogFileTest() throws Exception {
+		Assert.assertTrue(container.getDefaultLogFile().exists());
+	}
 }
