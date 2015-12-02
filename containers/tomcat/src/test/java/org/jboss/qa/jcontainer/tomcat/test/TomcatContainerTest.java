@@ -20,6 +20,7 @@ import org.jboss.qa.jcontainer.test.ContainerTest;
 import org.jboss.qa.jcontainer.tomcat.TomcatConfiguration;
 import org.jboss.qa.jcontainer.tomcat.TomcatContainer;
 import org.jboss.qa.jcontainer.tomcat.TomcatUser;
+import org.jboss.qa.jcontainer.util.FileUtils;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -64,5 +65,14 @@ public class TomcatContainerTest extends ContainerTest {
 	@Test
 	public void defaultLogFileTest() throws Exception {
 		Assert.assertTrue(container.getDefaultLogFile().exists());
+		log.debug("File '{}' -  length = {}", container.getDefaultLogFile().getName(), container.getDefaultLogFile().length());
+		Assert.assertFalse(FileUtils.isEmpty(container.getDefaultLogFile()));
+	}
+
+	@Test
+	public void stdoutLogFileTest() throws Exception {
+		Assert.assertTrue(container.getStdoutLogFile().exists());
+		log.debug("File '{}' -  length = {}", container.getStdoutLogFile().getName(), container.getStdoutLogFile().length());
+		Assert.assertFalse(FileUtils.isEmpty(container.getStdoutLogFile()));
 	}
 }

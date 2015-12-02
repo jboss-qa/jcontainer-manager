@@ -15,6 +15,8 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.jboss.qa.jcontainer.util.FileUtils;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,6 +27,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class BaseKarafContainerTest extends KarafContainerTest {
 
 	protected static KarafContainer container;
@@ -105,6 +110,15 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 	@Test
 	public void defaultLogFileTest() throws Exception {
 		Assert.assertTrue(container.getDefaultLogFile().exists());
+		log.debug("File '{}' -  length = {}", container.getDefaultLogFile().getName(), container.getDefaultLogFile().length());
+		Assert.assertFalse(FileUtils.isEmpty(container.getDefaultLogFile()));
+	}
+
+	@Test
+	public void stdoutLogFileTest() throws Exception {
+		Assert.assertTrue(container.getStdoutLogFile().exists());
+		log.debug("File '{}' -  length = {}", container.getStdoutLogFile().getName(), container.getStdoutLogFile().length());
+		Assert.assertFalse(FileUtils.isEmpty(container.getStdoutLogFile()));
 	}
 }
 
