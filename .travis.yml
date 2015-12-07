@@ -1,0 +1,36 @@
+language: java
+os:
+  - linux
+jdk:
+  - oraclejdk8
+
+before_install:
+  - "[[ -f $HOME/cache/$CONTAINER_ZIP ]] || wget $URL -P $HOME/cache"
+
+
+before_script:
+  - unzip $HOME/cache/$CONTAINER_ZIP -d $HOME
+  - " [[ \"$CONTAINER\" != \"tomcat\" ]] || chmod +x $HOME/$CONTAINER_HOME/bin/*.sh"
+
+script:
+  - mvn checkstyle:check
+  - mvn test -DskipTests=false -D${CONTAINER}.home="$HOME/$CONTAINER_HOME" -pl ":$CONTAINER"
+
+env:
+  - CONTAINER=karaf
+    URL="http://mirror.hosting90.cz/apache/karaf/4.0.2/apache-karaf-4.0.2.zip"
+    CONTAINER_HOME="apache-karaf-4.0.2"
+    CONTAINER_ZIP="apache-karaf-4.0.2.zip"
+  - CONTAINER=wildfly
+    URL="http://download.jboss.org/wildfly/9.0.2.Final/wildfly-9.0.2.Final.zip"
+    CONTAINER_HOME="wildfly-9.0.2.Final"
+    CONTAINER_ZIP="wildfly-9.0.2.Final.zip"
+  - CONTAINER=tomcat
+    URL="http://mirror.hosting90.cz/apache/tomcat/tomcat-8/v8.0.30/bin/apache-tomcat-8.0.30.zip"
+    CONTAINER_HOME="apache-tomcat-8.0.30"
+    CONTAINER_ZIP="apache-tomcat-8.0.30.zip"
+
+cache:
+  directories:
+  - $HOME/cache
+  - $HOME/.m2
