@@ -17,16 +17,24 @@ package org.jboss.qa.jcontainer.karaf.utils;
 
 import org.jboss.qa.jcontainer.karaf.KarafClient;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public final class CoreUtils {
 
-	public static String getSystemProperty(KarafClient client, String propertyName) throws Exception {
+	public static String getSystemProperty(KarafClient client, String propertyName) {
 		return getSystemProperty(client, propertyName, "system:property");
 	}
 
-	public static String getSystemProperty(KarafClient client, String propertyName, String command) throws Exception {
-		client.execute(String.format("%s %s", command, propertyName));
-		final String property = client.getCommandResult().replaceAll("\u001B\\[[;\\d]*m", "");
-		return property.trim();
+	public static String getSystemProperty(KarafClient client, String propertyName, String command) {
+		try {
+			client.execute(String.format("%s %s", command, propertyName));
+			final String property = client.getCommandResult().replaceAll("\u001B\\[[;\\d]*m", "");
+			return property.trim();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	private CoreUtils() {

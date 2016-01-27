@@ -17,12 +17,20 @@ package org.jboss.qa.jcontainer.wildfly.utils;
 
 import org.jboss.qa.jcontainer.wildfly.WildflyClient;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public final class CoreUtils {
 
-	public static String getSystemProperty(WildflyClient client, String propertyName) throws Exception {
-		client.execute(String.format(":resolve-expression(expression=${%s}", propertyName));
-		final String property = client.getCommandResult().get("result").asString().trim();
-		return property;
+	public static String getSystemProperty(WildflyClient client, String propertyName) {
+		try {
+			client.execute(String.format(":resolve-expression(expression=${%s}", propertyName));
+			final String property = client.getCommandResult().get("result").asString().trim();
+			return property;
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
 	}
 
 	private CoreUtils() {
