@@ -15,7 +15,9 @@
  */
 package org.jboss.qa.jcontainer.tomcat;
 
+import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.Container;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
@@ -37,7 +39,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -147,6 +151,7 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 			public void run() {
 				try {
 					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
+					processBuilder.environment().put("CATALINA_HOME", configuration.getDirectory().getAbsolutePath());
 					ProcessBuilderExecutor.syncExecute(processBuilder);
 				} catch (Exception e) {
 					throw new IllegalStateException("Tomcat container was not stopped", e);
@@ -161,11 +166,28 @@ public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClie
 	}
 
 	@Override
-	protected File getLogDirInternal() throws Exception {
+	protected File getLogDirInternal() {
 		final File logDir = new File(configuration.getDirectory(), "logs");
 		if (!logDir.exists() && !logDir.mkdirs()) {
 			throw new IllegalStateException(String.format("Directory %s could not be created", logDir.getAbsoluteFile()));
 		}
 		return logDir;
+	}
+
+	@Override
+	public File getDefaultLogFile() {
+		// Log file name format on Windows = "catalina.YYYY-MM-DD"
+		if (SystemUtils.IS_OS_WINDOWS) {
+			final File[] foundFiles = getLogDirInternal().listFiles(new FilenameFilter() {
+				public boolean accept(File dir, String name) {
+					return name.startsWith("catalina.");
+				}
+			});
+			Arrays.sort(foundFiles, NameFileComparator.NAME_COMPARATOR);
+			if (foundFiles.length > 0) {
+				return foundFiles[foundFiles.length - 1];
+			}
+		}
+		return super.getDefaultLogFile();
 	}
 }

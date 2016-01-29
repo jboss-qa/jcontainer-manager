@@ -94,7 +94,7 @@ public abstract class Container<T extends Configuration, U extends Client<T>, V 
 		return logFile;
 	}
 
-	protected abstract File getLogDirInternal() throws Exception;
+	protected abstract File getLogDirInternal();
 
 	protected void addShutdownHook(Thread hook) {
 		shutdownHooks.add(hook);

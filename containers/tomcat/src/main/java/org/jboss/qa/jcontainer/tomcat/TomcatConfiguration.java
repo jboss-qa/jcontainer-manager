@@ -108,6 +108,7 @@ public class TomcatConfiguration extends Configuration {
 				catalinaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
 			}
 			envProps.put(CATALINA_OPTS, catalinaOpts.toString());
+			envProps.put("CATALINA_HOME", directory.getAbsolutePath());
 			return new TomcatConfiguration(this);
 		}
 	}
