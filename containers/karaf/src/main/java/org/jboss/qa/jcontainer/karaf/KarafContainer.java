@@ -73,6 +73,7 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		if (getConfiguration().getSshPort() != KarafConfiguration.DEFAULT_SSH_PORT) {
 			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell");
 		}
+		configuration.getEnvProps().put("KARAF_REDIRECT", getStdoutLogFile().getAbsolutePath());
 		super.start();
 		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
