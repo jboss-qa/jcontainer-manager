@@ -17,7 +17,7 @@ package org.jboss.qa.jcontainer.util;
 
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -74,7 +74,7 @@ public final class ProcessUtils {
 				final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
 				String line;
 				while ((line = is.readLine()) != null) {
-					if (result == null && line.contains(Container.JCONTAINER_ID) && line.contains(String.valueOf(id))) {
+					if (result == null && line.contains(AbstractContainer.JCONTAINER_ID) && line.contains(String.valueOf(id))) {
 						result = pid;
 						//Don't break it here. We need to consume whole STDOUT of executed command.
 					}

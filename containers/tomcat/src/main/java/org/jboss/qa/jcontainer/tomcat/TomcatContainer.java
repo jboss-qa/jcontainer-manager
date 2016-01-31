@@ -19,7 +19,7 @@ import org.apache.commons.io.comparator.NameFileComparator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import org.w3c.dom.Document;
@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class TomcatContainer<T extends TomcatConfiguration, U extends TomcatClient<T>, V extends TomcatUser>
-		extends Container<T, U, V> {
+		extends AbstractContainer<T, U, V> {
 
 	public TomcatContainer(T configuration) {
 		super(configuration);

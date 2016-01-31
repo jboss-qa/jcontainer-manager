@@ -20,14 +20,14 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.util.ProcessUtils;
 import org.jboss.qa.jcontainer.wildfly.utils.CoreUtils;
 
 import java.io.File;
 
 public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyClient<T>, V extends WildflyUser>
-		extends Container<T, U, V> {
+		extends AbstractContainer<T, U, V> {
 
 	public WildflyContainer(T configuration) {
 		super(configuration);

@@ -20,7 +20,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<T>, V extends KarafUser>
-		extends Container<T, U, V> {
+		extends AbstractContainer<T, U, V> {
 
 	public KarafContainer(T configuration) {
 		super(configuration);
