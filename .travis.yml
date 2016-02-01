@@ -18,7 +18,7 @@ script:
 
 env:
   - CONTAINER=karaf
-    URL="http://mirror.hosting90.cz/apache/karaf/4.0.2/apache-karaf-4.0.2.zip"
+    URL="http://www.eu.apache.org/dist/karaf/4.0.2/apache-karaf-4.0.2.zip"
     CONTAINER_HOME="apache-karaf-4.0.2"
     CONTAINER_ZIP="apache-karaf-4.0.2.zip"
   - CONTAINER=wildfly
@@ -26,7 +26,7 @@ env:
     CONTAINER_HOME="wildfly-9.0.2.Final"
     CONTAINER_ZIP="wildfly-9.0.2.Final.zip"
   - CONTAINER=tomcat
-    URL="http://mirror.hosting90.cz/apache/tomcat/tomcat-8/v8.0.30/bin/apache-tomcat-8.0.30.zip"
+    URL="http://www.eu.apache.org/dist/tomcat/tomcat-8/v8.0.30/bin/apache-tomcat-8.0.30.zip"
     CONTAINER_HOME="apache-tomcat-8.0.30"
     CONTAINER_ZIP="apache-tomcat-8.0.30.zip"
 
