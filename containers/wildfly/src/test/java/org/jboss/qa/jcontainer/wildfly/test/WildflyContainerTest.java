@@ -15,7 +15,7 @@
  */
 package org.jboss.qa.jcontainer.wildfly.test;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.test.ContainerTest;
 import org.jboss.qa.jcontainer.util.FileUtils;
 import org.jboss.qa.jcontainer.wildfly.WildflyClient;
@@ -49,7 +49,7 @@ public class WildflyContainerTest extends ContainerTest {
 	protected static final String PROP_NAME = "my-prop";
 	protected static final String PROP_VAL = "my-value";
 
-	protected static Container container;
+	protected static AbstractContainer container;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {

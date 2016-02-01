@@ -15,7 +15,7 @@
  */
 package org.jboss.qa.jcontainer.tomcat.test;
 
-import org.jboss.qa.jcontainer.Container;
+import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.test.ContainerTest;
 import org.jboss.qa.jcontainer.tomcat.TomcatConfiguration;
 import org.jboss.qa.jcontainer.tomcat.TomcatContainer;
@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TomcatContainerTest extends ContainerTest {
 
 	public static final String TOMCAT_HOME = getProperty("tomcat.home");
-	protected static Container container;
+	protected static AbstractContainer container;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
