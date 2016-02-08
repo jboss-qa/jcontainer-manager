@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,7 +82,9 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 		cmds.add(String.format("config:property-set %s %s", PROP_NAME, PROP_VAL));
 		cmds.add("config:update");
 		container.getClient().execute(cmds);
-		Assert.assertTrue(container.getConfigFile(CONFIG).exists());
+		final File cfgFile = container.getConfigFile(CONFIG);
+		Assert.assertTrue(cfgFile.exists());
+		cfgFile.delete();
 	}
 
 	@Ignore("Batch rollback is not supported in Apache Karaf")
@@ -97,6 +100,14 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 		} catch (Exception e) {
 			Assert.assertFalse("Batch test does not work", container.getConfigFile(CONFIG).exists());
 		}
+	}
+
+	@Test
+	public void executeFileTest() throws Exception {
+		container.getClient().execute(new File("src/test/resources/commands.cli"));
+		final File cfgFile = container.getConfigFile("greeting");
+		Assert.assertTrue(cfgFile.exists());
+		cfgFile.delete();
 	}
 
 	@Test

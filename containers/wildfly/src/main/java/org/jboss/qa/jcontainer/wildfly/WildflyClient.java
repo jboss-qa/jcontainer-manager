@@ -92,7 +92,7 @@ public class WildflyClient<T extends WildflyConfiguration> extends Client<T> {
 	}
 
 	protected ModelControllerClient createClient(final InetAddress host, final int port,
-												 final String username, final String password) {
+			final String username, final String password) {
 		final CallbackHandler callbackHandler = new CallbackHandler() {
 			public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 				for (Callback current : callbacks) {

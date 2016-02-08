@@ -49,8 +49,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 
 	/**
 	 * Error message for failed command.
-	 * See:
-	 * https://github.com/apache/karaf/blob/master/shell/console/src/main/java/org/apache/felix/gogo/commands/CommandException.java#L58
+	 * See: https://goo.gl/cZQSFy
 	 */
 	private static final String COMMAND_FAIL_MSG = "Error executing command";
 	private static final String NEW_LINE = System.getProperty("line.separator");

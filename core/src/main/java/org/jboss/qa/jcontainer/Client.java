@@ -15,7 +15,10 @@
  */
 package org.jboss.qa.jcontainer;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -67,6 +70,11 @@ public abstract class Client<T extends Configuration> implements Closeable {
 			connect();
 		}
 		executeInternal(commands);
+	}
+
+	public void execute(File file) throws Exception {
+		log.info("Execute commands from file: {}", file.getAbsoluteFile());
+		execute(FileUtils.readLines(file));
 	}
 
 	protected abstract void closeInternal() throws IOException;
