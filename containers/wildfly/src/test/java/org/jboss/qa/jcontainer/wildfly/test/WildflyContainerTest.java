@@ -31,6 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -119,6 +120,14 @@ public class WildflyContainerTest extends ContainerTest {
 			log.info("Batch failed");
 		}
 		container.getClient().execute(String.format("/system-property=%s:read-resource", PROP_NAME));
+	}
+
+	@Test
+	public void executeFileTest() throws Exception {
+		container.getClient().execute(new File("src/test/resources/commands.cli"));
+		container.getClient().execute(String.format("/system-property=%s:read-resource", "greet"));
+		Assert.assertEquals("Hello",
+				((WildflyClient) container.getClient()).getCommandResult().get("result", "value").asString());
 	}
 
 	@Test

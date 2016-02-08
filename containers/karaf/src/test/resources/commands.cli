@@ -1,0 +1,4 @@
+# Add property
+config:edit greeting
+config:property-set greet Hello
+config:update
