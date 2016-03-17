@@ -125,6 +125,10 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 		final StringWriter sw = new StringWriter();
 		final PrintWriter pw = new PrintWriter(sw, true);
 		for (String cmd : commands) {
+			cmd = cmd.trim();
+			if (cmd.startsWith("#")) {
+				continue;
+			}
 			pw.println(cmd);
 		}
 		executeInternal(sw.toString());
