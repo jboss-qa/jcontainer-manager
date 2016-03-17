@@ -19,3 +19,6 @@ try (Client client = new EapClient<>(EapConfiguration.builder().build())) {
     client.execute(":whoami");
 }
 ```
+## Compatibility
+- EAP 6 + Java 7/8
+	- *Default*

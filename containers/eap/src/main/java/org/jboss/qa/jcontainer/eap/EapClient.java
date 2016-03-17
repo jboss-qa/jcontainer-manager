@@ -15,21 +15,14 @@
  */
 package org.jboss.qa.jcontainer.eap;
 
-import org.jboss.as.controller.client.ModelControllerClient;
 import org.jboss.qa.jcontainer.wildfly.WildflyClient;
 
-import java.net.InetAddress;
+import org.wildfly.extras.creaper.core.online.ManagementProtocol;
 
 public class EapClient<T extends EapConfiguration> extends WildflyClient<T> {
 
 	public EapClient(T configuration) {
 		super(configuration);
-	}
-
-	@Override
-	protected void connectInternal() throws Exception {
-		final ModelControllerClient client = createClient(InetAddress.getByName(configuration.getHost()),
-				configuration.getManagementNativePort(), configuration.getUsername(), configuration.getPassword());
-		context = createContext(client);
+		protocol = ManagementProtocol.REMOTE;
 	}
 }

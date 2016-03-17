@@ -21,7 +21,6 @@ import org.jboss.qa.jcontainer.eap.EapContainer;
 import org.jboss.qa.jcontainer.eap.EapUser;
 import org.jboss.qa.jcontainer.wildfly.test.WildflyContainerTest;
 
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,7 +52,7 @@ public class EapContainerTest extends WildflyContainerTest {
 	public void standaloneClientTest() throws Exception {
 		try (EapClient client = new EapClient<>(EapConfiguration.builder().build())) {
 			client.execute(GOOD_CMD);
-			Assert.assertNotNull(client.getCommandResult());
+			client.getCommandResult().assertSuccess();
 		}
 	}
 }

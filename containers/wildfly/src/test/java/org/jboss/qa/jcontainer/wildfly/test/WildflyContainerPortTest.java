@@ -21,7 +21,6 @@ import org.jboss.qa.jcontainer.wildfly.WildflyContainer;
 import org.jboss.qa.jcontainer.wildfly.WildflyUser;
 
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,8 +32,8 @@ import lombok.extern.slf4j.Slf4j;
 @RunWith(JUnit4.class)
 public class WildflyContainerPortTest extends WildflyContainerTest {
 
-	protected static final int MANAGEMENT_PORT = 9991;
-	protected static final int HTTP_PORT = 8181;
+	protected static final int MANAGEMENT_PORT = 19990;
+	protected static final int HTTP_PORT = 18080;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
@@ -62,7 +61,7 @@ public class WildflyContainerPortTest extends WildflyContainerTest {
 		try (WildflyClient client = new WildflyClient<>(WildflyConfiguration.builder()
 				.managementPort(MANAGEMENT_PORT).httpPort(HTTP_PORT).build())) {
 			client.execute(GOOD_CMD);
-			Assert.assertNotNull(client.getCommandResult());
+			client.getCommandResult().assertSuccess();
 		}
 	}
 }
