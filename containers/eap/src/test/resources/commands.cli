@@ -1,0 +1,4 @@
+# Add system property
+if (outcome != success) of /system-property=greet:read-resource
+	/system-property=greet:add(value=Hello)
+end-if
