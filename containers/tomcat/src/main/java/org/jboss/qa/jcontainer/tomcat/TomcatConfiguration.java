@@ -19,11 +19,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.Configuration;
+import org.jboss.qa.jcontainer.util.FileUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class TomcatConfiguration extends Configuration {
 
 	public static final String CATALINA_OPTS = "CATALINA_OPTS";
@@ -61,14 +65,24 @@ public class TomcatConfiguration extends Configuration {
 
 	public List<String> generateCommand(String scriptName) {
 		final List<String> cmd = new ArrayList<>();
+		final File binFolder = new File(directory, "bin");
+		File scriptFile = null;
 		if (SystemUtils.IS_OS_WINDOWS) {
+			scriptFile = new File(binFolder, scriptName + ".bat");
 			cmd.add("cmd");
 			cmd.add("/c");
-			cmd.add(new File(directory, "bin" + File.separator + scriptName + ".bat").getAbsolutePath());
 		} else {
+			scriptFile = new File(binFolder, scriptName + ".sh");
 			cmd.add("bash");
-			cmd.add(new File(directory, "bin" + File.separator + scriptName + ".sh").getAbsolutePath());
 		}
+		if (!scriptFile.exists()) {
+			throw new IllegalStateException(String.format("Script '%s' does not exist", scriptFile.getAbsolutePath()));
+		}
+		cmd.add(scriptFile.getAbsolutePath());
+
+		// Set shell scripts executable (required on linux for zip archives of tomcat).
+		FileUtils.setScriptsExecutable(binFolder);
+
 		return cmd;
 	}
 
