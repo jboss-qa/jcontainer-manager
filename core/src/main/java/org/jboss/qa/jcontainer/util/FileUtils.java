@@ -17,6 +17,7 @@ package org.jboss.qa.jcontainer.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,5 +29,18 @@ public final class FileUtils {
 	public static boolean isEmpty(File file) throws IOException {
 		// Do not use (File.length() == 0) condition. There is an UTF-8 issue connected with BOMs.
 		return org.apache.commons.io.FileUtils.readFileToString(file).trim().isEmpty();
+	}
+
+	public static void setScriptsExecutable(File folder) {
+		setScriptsExecutable(folder, false);
+	}
+
+	public static void setScriptsExecutable(File folder, boolean recursive) {
+		final String[] extensions = {"sh"};
+		final Collection<File> files = org.apache.commons.io.FileUtils.listFiles(folder, extensions, recursive);
+		for (final File file : files) {
+			log.debug("Setting executable rights for: " + file.getName());
+			file.setExecutable(true);
+		}
 	}
 }
