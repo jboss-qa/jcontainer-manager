@@ -86,55 +86,64 @@ public class WildflyContainerTest extends ContainerTest {
 		container.getClient().execute(GOOD_CMD);
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void badFormatCmdTest() throws Exception {
+		final WildflyClient client = (WildflyClient) container.getClient();
 		container.getClient().execute(BAD_FORMAT_CMD);
+		client.getCommandResult().assertFailed();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void badResultCmdTest() throws Exception {
+		final WildflyClient client = (WildflyClient) container.getClient();
 		container.getClient().execute(BAD_RESULT_CMD);
+		client.getCommandResult().assertFailed();
 	}
 
 	@Test
 	public void successBatchTest() throws Exception {
+		final WildflyClient client = (WildflyClient) container.getClient();
 		final List<String> cmds = new ArrayList<>();
 		cmds.add("batch");
 		cmds.add(String.format("/system-property=%s:add(value=%s)", PROP_NAME, PROP_VAL));
 		cmds.add(GOOD_CMD);
 		cmds.add("run-batch");
-		container.getClient().execute(cmds);
-		container.getClient().execute(String.format("/system-property=%s:read-resource", PROP_NAME));
+		client.execute(cmds);
+		client.execute(String.format("/system-property=%s:read-resource", PROP_NAME));
+		client.getCommandResult().assertSuccess();
 	}
 
-	@Test(expected = IllegalArgumentException.class)
+	@Test
 	public void failBatchTest() throws Exception {
+		final WildflyClient client = (WildflyClient) container.getClient();
 		final List<String> cmds = new ArrayList<>();
 		cmds.add("batch");
-		cmds.add(String.format("/system-property=%s:add(value=%s)", PROP_NAME, PROP_VAL)); // Step #1
+		cmds.add(String.format("/system-property=%s:add(value=%s)", PROP_NAME, PROP_VAL));
 		cmds.add(BAD_RESULT_CMD);
 		cmds.add("run-batch");
 		try {
 			container.getClient().execute(cmds);
 		} catch (Exception e) {
 			log.info("Batch failed");
+			client.execute("discard-batch");
 		}
-		container.getClient().execute(String.format("/system-property=%s:read-resource", PROP_NAME));
+		client.execute(String.format("/system-property=%s:read-resource", PROP_NAME));
+		client.getCommandResult().assertFailed();
 	}
 
 	@Test
 	public void executeFileTest() throws Exception {
-		container.getClient().execute(new File("src/test/resources/commands.cli"));
-		container.getClient().execute(String.format("/system-property=%s:read-resource", "greet"));
-		Assert.assertEquals("Hello",
-				((WildflyClient) container.getClient()).getCommandResult().get("result", "value").asString());
+		final WildflyClient client = (WildflyClient) container.getClient();
+		client.execute(new File("src/test/resources/commands.cli"));
+		client.execute(String.format("/system-property=%s:read-resource", "greet"));
+		Assert.assertEquals("Hello", client.getCommandResult().get("result", "value").asString());
 	}
 
 	@Test
 	public void standaloneClientTest() throws Exception {
 		try (WildflyClient client = new WildflyClient<>(WildflyConfiguration.builder().build())) {
 			client.execute(GOOD_CMD);
-			Assert.assertNotNull(client.getCommandResult());
+			client.getCommandResult().assertSuccess();
 		}
 	}
 

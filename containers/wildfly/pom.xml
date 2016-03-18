@@ -11,12 +11,33 @@
 	<artifactId>wildfly</artifactId>
 	<name>JContainer Manager :: Containers :: Wildfly</name>
 	<properties>
-		<version.wildfly>8.2.0.Final</version.wildfly>
+		<version.wildfly>2.0.5.Final</version.wildfly>
+		<version.creaper>1.0.0</version.creaper>
 	</properties>
 	<dependencies>
 		<dependency>
-			<groupId>org.wildfly</groupId>
+			<groupId>org.wildfly.extras.creaper</groupId>
+			<artifactId>creaper-core</artifactId>
+			<version>${version.creaper}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.extras.creaper</groupId>
+			<artifactId>creaper-commands</artifactId>
+			<version>${version.creaper}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.core</groupId>
+			<artifactId>wildfly-controller-client</artifactId>
+			<version>${version.wildfly}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.core</groupId>
 			<artifactId>wildfly-cli</artifactId>
+			<version>${version.wildfly}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.wildfly.core</groupId>
+			<artifactId>wildfly-patching</artifactId>
 			<version>${version.wildfly}</version>
 		</dependency>
 	</dependencies>

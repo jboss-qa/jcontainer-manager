@@ -10,6 +10,9 @@
 	</parent>
 	<artifactId>eap</artifactId>
 	<name>JContainer Manager :: Containers :: JBoss EAP</name>
+	<properties>
+		<version.jboss>7.5.0.Final-redhat-21</version.jboss>
+	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>org.jboss.qa.jcontainer.containers</groupId>
@@ -17,25 +20,33 @@
 			<version>${project.version}</version>
 			<exclusions>
 				<exclusion>
-					<groupId>org.wildfly</groupId>
+					<groupId>org.wildfly.core</groupId>
+					<artifactId>wildfly-controller-client</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.wildfly.core</groupId>
 					<artifactId>wildfly-cli</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.wildfly.core</groupId>
+					<artifactId>wildfly-patching</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-controller-client</artifactId>
+			<version>${version.jboss}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.as</groupId>
 			<artifactId>jboss-as-cli</artifactId>
-			<version>7.5.0.Final-redhat-21</version>
+			<version>${version.jboss}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.jboss.xnio</groupId>
-			<artifactId>xnio-api</artifactId>
-			<version>3.0.13.GA-redhat-1</version>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.xnio</groupId>
-			<artifactId>xnio-nio</artifactId>
-			<version>3.0.13.GA-redhat-1</version>
+			<groupId>org.wildfly</groupId>
+			<artifactId>wildfly-patching</artifactId>
+			<version>${version.jboss}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.jboss.qa.jcontainer.containers</groupId>

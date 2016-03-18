@@ -15,23 +15,19 @@
  */
 package org.jboss.qa.jcontainer.wildfly;
 
-import org.jboss.as.cli.CliInitializationException;
-import org.jboss.as.cli.CommandContext;
-import org.jboss.as.cli.CommandLineException;
-import org.jboss.as.cli.impl.ExtendedCommandContextImpl;
-import org.jboss.as.controller.client.ModelControllerClient;
-import org.jboss.dmr.ModelNode;
+import org.jboss.as.cli.operation.OperationFormatException;
 import org.jboss.qa.jcontainer.Client;
 
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.CallbackHandler;
-import javax.security.auth.callback.NameCallback;
-import javax.security.auth.callback.PasswordCallback;
-import javax.security.auth.callback.UnsupportedCallbackException;
-import javax.security.sasl.RealmCallback;
+import org.wildfly.extras.creaper.commands.foundation.online.CliFile;
+import org.wildfly.extras.creaper.core.ManagementClient;
+import org.wildfly.extras.creaper.core.online.CliException;
+import org.wildfly.extras.creaper.core.online.ManagementProtocol;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.OnlineOptions;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -39,89 +35,68 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class WildflyClient<T extends WildflyConfiguration> extends Client<T> {
 
-	protected CommandContext context;
+	protected ManagementProtocol protocol;
+	protected OnlineManagementClient client;
+	protected ModelNodeResult lastResult;
 
 	public WildflyClient(T configuration) {
 		super(configuration);
+		protocol = ManagementProtocol.HTTP_REMOTING;
 	}
 
 	@Override
 	public boolean isConnected() {
-		return context != null;
+		return client != null;
 	}
 
 	@Override
 	protected void connectInternal() throws Exception {
-		final ModelControllerClient client = createClient(InetAddress.getByName(configuration.getHost()),
-				configuration.getManagementPort(), configuration.getUsername(), configuration.getPassword());
-		context = createContext(client);
+		client = ManagementClient.online(OnlineOptions
+				.standalone()
+				.hostAndPort(configuration.getHost(), configuration.getManagementPort())
+				.protocol(protocol)
+				.build()
+		);
 	}
 
 	@Override
 	protected void executeInternal(String command) throws Exception {
 		try {
-			context.handle(command);
-		} catch (CommandLineException e) {
-			if (context.getBatchManager().isBatchActive()) {
-				context.getBatchManager().discardActiveBatch();
+			lastResult = client.execute(command);
+		} catch (CliException e) {
+			if (e.getCause().getClass().isAssignableFrom(OperationFormatException.class)) {
+				// Workaround for unsupported commands by Wildfly Creaper project
+				client.executeCli(command);
 			}
-			throw new IllegalArgumentException(String.format("Command execution failed for command '%s'. %s", command,
-					e.getLocalizedMessage()), e);
 		}
 	}
 
 	@Override
 	protected void executeInternal(List<String> commands) throws Exception {
+		// List of commands may contain commands like "if", "batch". Use rather "executeCli" then "execute".
 		for (String cmd : commands) {
-			executeInternal(cmd);
+			client.executeCli(cmd);
 		}
-		Thread.sleep(500); // NOTE: Result of the operation is not visible immediately
+	}
+
+	@Override
+	public void execute(File file) throws Exception {
+		log.info("Execute commands from file: {}", file.getAbsoluteFile());
+		client.apply(new CliFile(file));
 	}
 
 	@Override
 	protected void closeInternal() throws IOException {
-		context.terminateSession();
-		context = null;
+		client.close();
+		client = null;
+		lastResult = null;
 	}
 
-	public ModelNode getCommandResult() {
-		if (isConnected()) {
-			return ((ExtendedCommandContextImpl) context).getLastResult();
-		}
-		return null;
+	public ModelNodeResult getCommandResult() {
+		return lastResult;
 	}
 
-	protected ModelControllerClient createClient(final InetAddress host, final int port,
-			final String username, final String password) {
-		final CallbackHandler callbackHandler = new CallbackHandler() {
-			public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
-				for (Callback current : callbacks) {
-					if (current instanceof NameCallback) {
-						final NameCallback ncb = (NameCallback) current;
-						ncb.setName(username);
-					} else if (current instanceof PasswordCallback) {
-						final PasswordCallback pcb = (PasswordCallback) current;
-						pcb.setPassword(password.toCharArray());
-					} else if (current instanceof RealmCallback) {
-						final RealmCallback rcb = (RealmCallback) current;
-						rcb.setText(rcb.getDefaultText());
-					} else {
-						throw new UnsupportedCallbackException(current);
-					}
-				}
-			}
-		};
-		return ModelControllerClient.Factory.create(host, port, callbackHandler);
-	}
-
-	protected CommandContext createContext(final ModelControllerClient client) {
-		final CommandContext commandContext;
-		try {
-			commandContext = new ExtendedCommandContextImpl();
-			commandContext.bindClient(client);
-		} catch (CliInitializationException e) {
-			throw new IllegalStateException("Failed to initialize CLI context", e);
-		}
-		return commandContext;
+	public OnlineManagementClient getInternalClient() {
+		return client;
 	}
 }
