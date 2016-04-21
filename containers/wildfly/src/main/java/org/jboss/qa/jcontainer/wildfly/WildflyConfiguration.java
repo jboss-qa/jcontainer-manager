@@ -99,11 +99,11 @@ public class WildflyConfiguration extends Configuration {
 
 	@Override
 	public int getBusyPort() {
-		return httpPort;
+		return managementPort;
 	}
 
 	public static enum Mode {
-		STANDALONE("standalone"), MANAGEMENT("management");
+		STANDALONE("standalone"), DOMAIN("domain");
 
 		private final String mode;
 
@@ -151,6 +151,11 @@ public class WildflyConfiguration extends Configuration {
 
 		public T mode(Mode mode) {
 			this.mode = mode;
+			return self();
+		}
+
+		public T adminOnly() {
+			param("--admin-only");
 			return self();
 		}
 
