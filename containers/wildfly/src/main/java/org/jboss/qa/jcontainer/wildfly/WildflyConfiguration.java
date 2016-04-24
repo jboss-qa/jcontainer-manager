@@ -24,13 +24,18 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 public class WildflyConfiguration extends Configuration {
 
 	public static final int DEFAULT_PORT_OFFSET = 0;
 	public static final int DEFAULT_MANAGEMENT_PORT = 9990;
 
+	@Getter
 	protected final int portOffset;
+	@Getter
 	protected final String profile;
+	@Getter
 	protected final Mode mode;
 	protected final File script;
 
@@ -47,18 +52,6 @@ public class WildflyConfiguration extends Configuration {
 
 	public static Builder<?> builder() {
 		return new Builder2();
-	}
-
-	public String getProfile() {
-		return profile;
-	}
-
-	public int getPortOffset() {
-		return portOffset;
-	}
-
-	public Mode getMode() {
-		return mode;
 	}
 
 	public File getBaseDir() {
@@ -100,7 +93,7 @@ public class WildflyConfiguration extends Configuration {
 		return DEFAULT_MANAGEMENT_PORT + portOffset;
 	}
 
-	public static enum Mode {
+	public enum Mode {
 		STANDALONE("standalone"), DOMAIN("domain");
 
 		private final String mode;

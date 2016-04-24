@@ -17,22 +17,18 @@ package org.jboss.qa.jcontainer.wildfly;
 
 import org.jboss.qa.jcontainer.User;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class WildflyUser extends User {
+	@Getter @Setter
 	private Realm realm;
 
 	public WildflyUser() {
 		this.realm = Realm.MANAGEMENT_REALM;
 	}
 
-	public Realm getRealm() {
-		return realm;
-	}
-
-	public void setRealm(Realm realm) {
-		this.realm = realm;
-	}
-
-	public static enum Realm {
+	public enum Realm {
 		MANAGEMENT_REALM("ManagementRealm"), APPLICATION_REALM("ApplicationRealm");
 
 		private final String realm;

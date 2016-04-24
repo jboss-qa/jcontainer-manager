@@ -41,8 +41,8 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 		checkMandatoryProperty("username", user.getUsername());
 		checkMandatoryProperty("password", user.getUsername());
 
-		File usersFile;
-		File rolesFile;
+		final File usersFile;
+		final File rolesFile;
 		if (user.getRealm().equals(WildflyUser.Realm.APPLICATION_REALM)) {
 			usersFile = new File(configuration.getConfigurationFolder(), "application-users.properties");
 			rolesFile = new File(configuration.getConfigurationFolder(), "application-roles.properties");

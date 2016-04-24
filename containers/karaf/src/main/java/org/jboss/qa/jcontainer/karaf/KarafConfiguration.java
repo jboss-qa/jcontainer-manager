@@ -24,6 +24,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 public class KarafConfiguration extends Configuration {
 
 	public static final String KARAF_OPTS_ENV_NAME = "KARAF_OPTS";
@@ -31,8 +33,11 @@ public class KarafConfiguration extends Configuration {
 	public static final int DEFAULT_HTTP_PORT = 8181;
 	public static final int DEFAULT_SSH_PORT = 8101;
 
+	@Getter
 	protected final int httpPort;
+	@Getter
 	protected final int sshPort;
+	@Getter
 	protected final File keyFile;
 	protected final File script;
 	protected final File stopScript;
@@ -52,20 +57,8 @@ public class KarafConfiguration extends Configuration {
 		return KARAF_OPTS_ENV_NAME;
 	}
 
-	public int getHttpPort() {
-		return httpPort;
-	}
-
-	public int getSshPort() {
-		return sshPort;
-	}
-
 	public static Builder<?> builder() {
 		return new Builder2();
-	}
-
-	public File getKeyFile() {
-		return keyFile;
 	}
 
 	@Override
