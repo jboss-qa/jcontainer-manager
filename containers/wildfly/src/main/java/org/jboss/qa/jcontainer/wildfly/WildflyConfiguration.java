@@ -26,19 +26,17 @@ import java.util.List;
 
 public class WildflyConfiguration extends Configuration {
 
-	public static final int DEFAULT_HTTP_PORT = 8080;
+	public static final int DEFAULT_PORT_OFFSET = 0;
 	public static final int DEFAULT_MANAGEMENT_PORT = 9990;
 
-	protected final int httpPort;
-	protected final int managementPort;
+	protected final int portOffset;
 	protected final String profile;
 	protected final Mode mode;
 	protected final File script;
 
 	protected WildflyConfiguration(Builder<?> builder) {
 		super(builder);
-		httpPort = builder.httpPort;
-		managementPort = builder.managementPort;
+		portOffset = builder.portOffset;
 		profile = builder.profile;
 		mode = builder.mode;
 		script = builder.script;
@@ -55,12 +53,8 @@ public class WildflyConfiguration extends Configuration {
 		return profile;
 	}
 
-	public int getHttpPort() {
-		return httpPort;
-	}
-
-	public int getManagementPort() {
-		return managementPort;
+	public int getPortOffset() {
+		return portOffset;
 	}
 
 	public Mode getMode() {
@@ -99,7 +93,11 @@ public class WildflyConfiguration extends Configuration {
 
 	@Override
 	public int getBusyPort() {
-		return managementPort;
+		return getManagementPort();
+	}
+
+	public int getManagementPort() {
+		return DEFAULT_MANAGEMENT_PORT + portOffset;
 	}
 
 	public static enum Mode {
@@ -117,8 +115,7 @@ public class WildflyConfiguration extends Configuration {
 	}
 
 	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
-		protected int httpPort;
-		protected int managementPort;
+		protected int portOffset;
 		protected String profile;
 		protected Mode mode;
 		protected File script;
@@ -127,20 +124,14 @@ public class WildflyConfiguration extends Configuration {
 			xms = "64m";
 			xmx = "512m";
 			maxPermSize = "256m";
-			httpPort = DEFAULT_HTTP_PORT;
-			managementPort = DEFAULT_MANAGEMENT_PORT;
+			portOffset = DEFAULT_PORT_OFFSET;
 			profile = "standalone.xml";
 			mode = Mode.STANDALONE;
 			logFileName = "server.log";
 		}
 
-		public T httpPort(int httpPort) {
-			this.httpPort = httpPort;
-			return self();
-		}
-
-		public T managementPort(int managementPort) {
-			this.managementPort = managementPort;
+		public T portOffset(int portOffset) {
+			this.portOffset = portOffset;
 			return self();
 		}
 
@@ -172,22 +163,21 @@ public class WildflyConfiguration extends Configuration {
 			// Set JAVA_OPTS
 			final StringBuffer javaOpts = new StringBuffer();
 			if (!StringUtils.isEmpty(xms)) {
-				javaOpts.append(" -Xms" + xms);
+				javaOpts.append(" -Xms").append(xms);
 			}
 			if (!StringUtils.isEmpty(xmx)) {
-				javaOpts.append(" -Xmx" + xmx);
+				javaOpts.append(" -Xmx").append(xmx);
 			}
 			if (!StringUtils.isEmpty(permSize)) {
-				javaOpts.append(" -XX:PermSize=" + permSize);
+				javaOpts.append(" -XX:PermSize=").append(permSize);
 			}
 			if (!StringUtils.isEmpty(maxPermSize)) {
-				javaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
+				javaOpts.append(" -XX:MaxPermSize=").append(maxPermSize);
 			}
 			javaOpts.append(" -Djava.net.preferIPv4Stack=true");
 			javaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
 			javaOpts.append(" -Djava.awt.headless=true");
-			javaOpts.append(" -Djboss.management.http.port=" + managementPort);
-			javaOpts.append(" -Djboss.http.port=" + httpPort);
+			javaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
 			envProps.put("JAVA_OPTS", javaOpts.toString());
 
 			return new WildflyConfiguration(this);
