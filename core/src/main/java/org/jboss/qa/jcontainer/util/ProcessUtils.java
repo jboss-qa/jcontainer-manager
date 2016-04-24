@@ -20,6 +20,7 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jboss.qa.jcontainer.AbstractContainer;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,10 +46,6 @@ public final class ProcessUtils {
 	}
 
 	public static void killJavaByContainerId(long id) {
-		if (!SystemUtils.IS_OS_WINDOWS) { // Needs sudo for unix-like OS
-			log.error("Killing by container id is not unsupported for {}", SystemUtils.OS_NAME);
-			return;
-		}
 		final String pid = getJavaPidByContainerId(id);
 		if (pid != null) {
 			kill(pid);
@@ -58,6 +55,41 @@ public final class ProcessUtils {
 	}
 
 	public static String getJavaPidByContainerId(long id) {
+		if (SystemUtils.IS_OS_WINDOWS) {
+			return getJavaPidByContainerIdWindows(id);
+		} else {
+			return getJavaPidByContainerIdUnix(id);
+		}
+	}
+
+	private static String getJavaPidByContainerIdUnix(long id) {
+		final String command = String.format("ps -ef | grep \\\\-Djcontainer.id=%d | grep -v grep | grep -v \"/bin/bash\" | awk '{print $2}'", id);
+		try {
+			final Process p = Runtime.getRuntime().exec(new String[] {"bash", "-c", command});
+			try (final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				 final BufferedReader es = new BufferedReader(new InputStreamReader(p.getErrorStream()))
+			) {
+				String result = null;
+				String line;
+				while ((line = is.readLine()) != null) {
+					result = line;
+				}
+				final int exitValue = p.waitFor();
+				if (exitValue != 0) {
+					log.error("Process ended with exit value {}", exitValue);
+					while ((line = es.readLine()) != null) {
+						log.error(line);
+					}
+				}
+				return result;
+			}
+		} catch (IOException | InterruptedException e) {
+			log.error(e.getMessage(), e);
+			return null;
+		}
+	}
+
+	private static String getJavaPidByContainerIdWindows(long id) {
 		String result = null;
 		try {
 			final Long currentPid = PidUtils.getPID();
