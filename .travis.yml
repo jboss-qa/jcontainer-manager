@@ -30,6 +30,10 @@ env:
     URL="http://www.eu.apache.org/dist/tomcat/tomcat-8/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.zip"
     CONTAINER_HOME="apache-tomcat-$TOMCAT_VERSION"
     CONTAINER_ZIP="apache-tomcat-$TOMCAT_VERSION.zip"
+  - CONTAINER=fuse
+    URL="http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/$FUSE_VERSION/jboss-fuse-full-$FUSE_VERSION.zip"
+    CONTAINER_HOME="jboss-fuse-$FUSE_VERSION"
+    CONTAINER_ZIP="jboss-fuse-full-$FUSE_VERSION.zip"
 
 matrix:
   exclude:
