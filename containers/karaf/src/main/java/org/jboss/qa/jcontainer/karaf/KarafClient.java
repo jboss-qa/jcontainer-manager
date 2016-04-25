@@ -42,6 +42,7 @@ import java.security.KeyPair;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -54,6 +55,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 	private static final String COMMAND_FAIL_MSG = "Error executing command";
 	private static final String NEW_LINE = System.getProperty("line.separator");
 
+	@Getter
 	private String commandResult;
 
 	protected SshClient client;
@@ -132,10 +134,6 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 			pw.println(cmd);
 		}
 		executeInternal(sw.toString());
-	}
-
-	public String getCommandResult() {
-		return commandResult;
 	}
 
 	protected void setupAgent(String user, File keyFile, SshClient client) {

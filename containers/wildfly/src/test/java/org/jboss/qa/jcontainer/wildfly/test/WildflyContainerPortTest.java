@@ -32,13 +32,12 @@ import lombok.extern.slf4j.Slf4j;
 @RunWith(JUnit4.class)
 public class WildflyContainerPortTest extends WildflyContainerTest {
 
-	protected static final int MANAGEMENT_PORT = 19990;
-	protected static final int HTTP_PORT = 18080;
+	public static final int PORT_OFFSET = 10000;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		final WildflyConfiguration conf = WildflyConfiguration.builder().directory(WILDFLY_HOME).xmx("2g")
-				.managementPort(MANAGEMENT_PORT).httpPort(HTTP_PORT).build();
+				.portOffset(PORT_OFFSET).build();
 		container = new WildflyContainer<>(conf);
 		final WildflyUser user = new WildflyUser();
 		user.setUsername(conf.getUsername());
@@ -59,7 +58,7 @@ public class WildflyContainerPortTest extends WildflyContainerTest {
 	@Test
 	public void standaloneClientTest() throws Exception {
 		try (WildflyClient client = new WildflyClient<>(WildflyConfiguration.builder()
-				.managementPort(MANAGEMENT_PORT).httpPort(HTTP_PORT).build())) {
+				.portOffset(PORT_OFFSET).build())) {
 			client.execute(GOOD_CMD);
 			client.getCommandResult().assertSuccess();
 		}

@@ -24,12 +24,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Getter;
+
 public class TomcatConfiguration extends Configuration {
 
 	public static final String CATALINA_OPTS = "CATALINA_OPTS";
 
 	public static final int DEFAULT_HTTP_PORT = 8080;
 
+	@Getter
 	protected final int httpPort;
 
 	protected TomcatConfiguration(Builder<?> builder) {
@@ -39,10 +42,6 @@ public class TomcatConfiguration extends Configuration {
 
 	public static Builder<?> builder() {
 		return new Builder2();
-	}
-
-	public int getHttpPort() {
-		return httpPort;
 	}
 
 	@Override

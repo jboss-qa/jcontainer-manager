@@ -21,19 +21,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class KarafUser extends User {
+	@Getter @Setter
 	private List<String> groups;
 
 	public KarafUser() {
 		this.groups = new ArrayList<>();
-	}
-
-	public List<String> getGroups() {
-		return groups;
-	}
-
-	public void setGroups(List<String> groups) {
-		this.groups = groups;
 	}
 
 	public void addGroups(String... groups) {

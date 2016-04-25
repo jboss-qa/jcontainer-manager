@@ -35,12 +35,12 @@ import lombok.extern.slf4j.Slf4j;
 public class EapContainerPortTest extends WildflyContainerTest {
 
 	public static final String EAP_HOME = getProperty("eap.home");
-	protected static final int MANAGEMENT_PORT = 19990;
+	public static final int PORT_OFFSET = 10000;
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		final EapConfiguration conf = EapConfiguration.builder().directory(EAP_HOME).xmx("2g")
-				.managementPort(MANAGEMENT_PORT).build();
+				.portOffset(PORT_OFFSET).build();
 		container = new EapContainer<>(conf);
 		final EapUser user = new EapUser();
 		user.setUsername(conf.getUsername());
@@ -61,7 +61,7 @@ public class EapContainerPortTest extends WildflyContainerTest {
 	@Test
 	@Override
 	public void standaloneClientTest() throws Exception {
-		try (EapClient client = new EapClient<>(EapConfiguration.builder().managementPort(MANAGEMENT_PORT).build())) {
+		try (EapClient client = new EapClient<>(EapConfiguration.builder().portOffset(PORT_OFFSET).build())) {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}
