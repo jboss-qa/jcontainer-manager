@@ -37,6 +37,7 @@ public class WildflyConfiguration extends Configuration {
 	protected final String profile;
 	@Getter
 	protected final Mode mode;
+	protected final File baseDir;
 	protected final File script;
 
 	protected WildflyConfiguration(Builder<?> builder) {
@@ -44,6 +45,7 @@ public class WildflyConfiguration extends Configuration {
 		portOffset = builder.portOffset;
 		profile = builder.profile;
 		mode = builder.mode;
+		baseDir = builder.baseDir;
 		script = builder.script;
 		// Following environment property ensures that wildfly-modules process will be killed
 		// when container is stopped.
@@ -55,13 +57,11 @@ public class WildflyConfiguration extends Configuration {
 	}
 
 	public File getBaseDir() {
-		// TODO(mbasovni): Add support of "jboss.server.base.dir"
-		final String modeVal = (this.mode != null ? this.mode.getValue() : Mode.STANDALONE.getValue());
-		return new File(directory, modeVal);
+		return (baseDir != null) ? baseDir : new File(baseDir, Mode.STANDALONE.getValue());
 	}
 
 	public File getConfigurationFolder() {
-		// TODO(mbasovni): Add support of "jboss.server.config.dir"
+		// Ignores property "jboss.server.config.dir"
 		return new File(getBaseDir(), "configuration");
 	}
 
@@ -111,6 +111,7 @@ public class WildflyConfiguration extends Configuration {
 		protected int portOffset;
 		protected String profile;
 		protected Mode mode;
+		protected File baseDir;
 		protected File script;
 
 		public Builder() {
@@ -125,6 +126,11 @@ public class WildflyConfiguration extends Configuration {
 
 		public T portOffset(int portOffset) {
 			this.portOffset = portOffset;
+			return self();
+		}
+
+		public T baseDir(File baseDir) {
+			this.baseDir = baseDir;
 			return self();
 		}
 
@@ -171,6 +177,9 @@ public class WildflyConfiguration extends Configuration {
 			javaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
 			javaOpts.append(" -Djava.awt.headless=true");
 			javaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
+			if (baseDir != null) {
+				javaOpts.append(" -Djboss.server.base.dir=").append(baseDir);
+			}
 			envProps.put("JAVA_OPTS", javaOpts.toString());
 
 			return new WildflyConfiguration(this);
