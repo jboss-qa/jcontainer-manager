@@ -10,7 +10,7 @@
 	<name>JContainer Manager :: Containers :: Wildfly</name>
 	<properties>
 		<version.wildfly>2.0.5.Final</version.wildfly>
-		<version.creaper>1.0.0</version.creaper>
+		<version.creaper>1.1.0</version.creaper>
 	</properties>
 	<dependencies>
 		<dependency>
