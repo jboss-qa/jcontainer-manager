@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.qa.jcontainer.containers</groupId>
 		<artifactId>containers-parent</artifactId>
-		<version>1.2.2-SNAPSHOT</version>
+		<version>1.2.2</version>
 	</parent>
 	<artifactId>fuse</artifactId>
 	<name>JContainer Manager :: Containers :: JBoss Fuse</name>
