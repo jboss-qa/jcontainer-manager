@@ -57,7 +57,7 @@ public class WildflyConfiguration extends Configuration {
 	}
 
 	public File getBaseDir() {
-		return (baseDir != null) ? baseDir : new File(baseDir, Mode.STANDALONE.getValue());
+		return (baseDir != null) ? baseDir : new File(directory, Mode.STANDALONE.getValue());
 	}
 
 	public File getConfigurationFolder() {
