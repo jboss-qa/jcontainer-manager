@@ -39,6 +39,7 @@ public class WildflyConfiguration extends Configuration {
 	protected final Mode mode;
 	protected final File baseDir;
 	protected final File script;
+	protected final String nodeName;
 
 	protected WildflyConfiguration(Builder<?> builder) {
 		super(builder);
@@ -47,6 +48,7 @@ public class WildflyConfiguration extends Configuration {
 		mode = builder.mode;
 		baseDir = builder.baseDir;
 		script = builder.script;
+		nodeName = builder.nodeName;
 		// Following environment property ensures that wildfly-modules process will be killed
 		// when container is stopped.
 		envProps.put("LAUNCH_JBOSS_IN_BACKGROUND", "true");
@@ -113,6 +115,7 @@ public class WildflyConfiguration extends Configuration {
 		protected Mode mode;
 		protected File baseDir;
 		protected File script;
+		protected String nodeName;
 
 		public Builder() {
 			xms = "64m";
@@ -149,6 +152,11 @@ public class WildflyConfiguration extends Configuration {
 			return self();
 		}
 
+		public T nodeName(String nodeName) {
+			this.nodeName = nodeName;
+			return self();
+		}
+
 		public WildflyConfiguration build() {
 			// Set script
 			if (mode.equals(Mode.STANDALONE)) {
@@ -179,6 +187,9 @@ public class WildflyConfiguration extends Configuration {
 			javaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
 			if (baseDir != null) {
 				javaOpts.append(" -Djboss.server.base.dir=").append(baseDir);
+			}
+			if (nodeName != null) {
+				javaOpts.append(" -Djboss.node.name=").append(nodeName);
 			}
 			envProps.put("JAVA_OPTS", javaOpts.toString());
 
