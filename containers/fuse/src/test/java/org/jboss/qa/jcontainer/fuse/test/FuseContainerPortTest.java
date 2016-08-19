@@ -31,6 +31,9 @@ import org.junit.runners.JUnit4;
 
 import java.io.File;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RunWith(JUnit4.class)
 public class FuseContainerPortTest extends BaseFuseContainerTest {
 
@@ -46,6 +49,7 @@ public class FuseContainerPortTest extends BaseFuseContainerTest {
 		user.setPassword(conf.getPassword());
 		user.addRoles("admin", "SuperUser");
 		container.addUser(user);
+		awaitContainerIsNotRunning(container);
 		container.start();
 	}
 
@@ -53,6 +57,7 @@ public class FuseContainerPortTest extends BaseFuseContainerTest {
 	public static void afterClass() throws Exception {
 		if (container != null) {
 			container.stop();
+			awaitContainerIsNotRunning(container);
 			final File propsFile = new File(container.getConfiguration().getDirectory(),
 					"etc" + File.separator + "org.apache.karaf.shell.cfg");
 			final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
