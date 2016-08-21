@@ -1,0 +1,48 @@
+version: 1.0.{build}
+init:
+  - ps: |
+      if (!(Test-Path -Path $env:DOWNLOAD_PATH)) {
+        mkdir $env:DOWNLOAD_PATH;
+      }
+      $destination=$env:DOWNLOAD_PATH+$env:CONTAINER_ZIP;
+      if (!(Test-Path -Path $destination)) {
+        Invoke-WebRequest $env:URL -OutFile $destination
+      }
+environment:
+  global:
+    JAVA_HOME: C:\Program Files\Java\jdk1.8.0
+    DOWNLOAD_PATH: C:\Downloads\
+    CATALINA_HOME: C:\projects\apache-tomcat-8.0.36
+  matrix:
+    - CONTAINER: karaf
+      URL: http://central.maven.org/maven2/org/apache/karaf/apache-karaf/4.0.5/apache-karaf-4.0.5.zip
+      CONTAINER_ZIP: apache-karaf-4.0.5.zip
+      CONTAINER_HOME: apache-karaf-4.0.5
+    - CONTAINER: tomcat
+      URL: http://central.maven.org/maven2/org/apache/tomcat/tomcat/8.0.36/tomcat-8.0.36.zip
+      CONTAINER_ZIP: tomcat-8.0.36.zip
+      CONTAINER_HOME: apache-tomcat-8.0.36
+    - CONTAINER: wildfly
+      URL: http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.zip
+      CONTAINER_ZIP: wildfly-10.0.0.Final.zip
+      CONTAINER_HOME: wildfly-10.0.0.Final
+    - CONTAINER: fuse
+      URL: http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/6.2.1.redhat-143/jboss-fuse-full-6.2.1.redhat-143.zip
+      CONTAINER_ZIP: jboss-fuse-full-6.2.1.redhat-143.zip
+      CONTAINER_HOME: jboss-fuse-6.2.1.redhat-143
+install:
+  - SET PATH=%JAVA_HOME%\bin;%PATH%
+  - cinst maven -version 3.3.9
+  - SET PATH=C:\tools\apache-maven-3.3.9\bin;%PATH%
+  - ps: Expand-Archive $env:DOWNLOAD_PATH$env:CONTAINER_ZIP -dest C:\projects\
+
+build_script:
+  - refreshenv
+  - mvn --batch-mode clean install
+
+test_script:
+  - mvn --batch-mode test -DskipTests=false -pl ":%CONTAINER%" "-D%CONTAINER%.home=C:\projects\%CONTAINER_HOME%"
+
+cache:
+  - C:\Users\appveyor\.m2
+  - C:\Downloads
