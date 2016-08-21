@@ -19,7 +19,7 @@ script:
 
 env:
   - CONTAINER=karaf
-    URL="http://www.eu.apache.org/dist/karaf/$KARAF_VERSION/apache-karaf-$KARAF_VERSION.zip"
+    URL="http://central.maven.org/maven2/org/apache/karaf/apache-karaf/$KARAF_VERSION/apache-karaf-$KARAF_VERSION.zip"
     CONTAINER_HOME="apache-karaf-$KARAF_VERSION"
     CONTAINER_ZIP="apache-karaf-$KARAF_VERSION.zip"
   - CONTAINER=wildfly
@@ -27,9 +27,9 @@ env:
     CONTAINER_HOME="wildfly-$WILDFLY_VERSION"
     CONTAINER_ZIP="wildfly-$WILDFLY_VERSION.zip"
   - CONTAINER=tomcat
-    URL="http://www.eu.apache.org/dist/tomcat/tomcat-8/v$TOMCAT_VERSION/bin/apache-tomcat-$TOMCAT_VERSION.zip"
+    URL="http://central.maven.org/maven2/org/apache/tomcat/tomcat/$TOMCAT_VERSION/tomcat-$TOMCAT_VERSION.zip"
     CONTAINER_HOME="apache-tomcat-$TOMCAT_VERSION"
-    CONTAINER_ZIP="apache-tomcat-$TOMCAT_VERSION.zip"
+    CONTAINER_ZIP="tomcat-$TOMCAT_VERSION.zip"
   - CONTAINER=fuse
     URL="http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/$FUSE_VERSION/jboss-fuse-full-$FUSE_VERSION.zip"
     CONTAINER_HOME="jboss-fuse-$FUSE_VERSION"
