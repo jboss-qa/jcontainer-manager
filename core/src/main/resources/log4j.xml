@@ -10,6 +10,11 @@
 		</layout>
 	</appender>
 
+	<logger name="org.apache.sshd">
+		<level value="WARN" />
+		<appender-ref ref="console"/>
+	</logger>
+
 	<root>
 		<level value="DEBUG"/>
 		<appender-ref ref="console"/>

@@ -15,10 +15,13 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.util.FileUtils;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -127,6 +130,7 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 
 	@Test
 	public void stdoutLogFileTest() throws Exception {
+		Assume.assumeFalse("Redirect of stdout/stderr is not working on Windows.", SystemUtils.IS_OS_WINDOWS);
 		Assert.assertTrue(container.getStdoutLogFile().exists());
 		log.debug("File '{}' -  length = {}", container.getStdoutLogFile().getName(), container.getStdoutLogFile().length());
 		Assert.assertFalse(FileUtils.isEmpty(container.getStdoutLogFile()));
