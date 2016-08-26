@@ -22,11 +22,13 @@ import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
 import org.jboss.qa.jcontainer.AbstractContainer;
 import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
+import org.jboss.qa.jcontainer.util.ProcessUtils;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -77,11 +79,25 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		super.start();
 		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
+				log.debug("Start shutdown sequence.");
 				try {
 					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
 					ProcessBuilderExecutor.syncExecute(processBuilder);
 				} catch (Exception e) {
 					throw new IllegalStateException("Karaf container was not stopped", e);
+				}
+			}
+		}));
+		addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					while (ProcessUtils.getJavaPidByContainerId(getId()) != null) {
+						log.debug("Stopping container...");
+						Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+					}
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
 			}
 		}));
