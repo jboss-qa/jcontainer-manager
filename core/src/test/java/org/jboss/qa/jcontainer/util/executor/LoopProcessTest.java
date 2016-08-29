@@ -76,6 +76,7 @@ public class LoopProcessTest {
 		final Process process = ProcessExecutor.builder().commands(commands).outputStream(System.out).errorStream(System.err).redirectError(false).build()
 				.asyncExecute();
 		Thread.sleep(3000);
+		log.info("Terminate process");
 		process.destroy();
 		assertEquals(0, process.waitFor());
 	}

@@ -15,10 +15,7 @@
  */
 package org.jboss.qa.jcontainer.util.executor;
 
-import org.apache.commons.lang3.SystemUtils;
-
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -32,20 +29,12 @@ public final class ProcessBuilderExecutor {
 	}
 
 	public static int syncExecute(final ProcessBuilder processBuilder) throws InterruptedException, IOException {
-		try {
-			return ProcessExecutor.builder().processBuilder(processBuilder).redirectError(true).build().syncExecute();
-		} catch (ExecutionException e) {
-			log.error(e.getMessage(), e);
-			return 600;
-		}
+		return syncExecute(processBuilder, null);
 	}
 
 	public static int syncExecute(final ProcessBuilder processBuilder, final File outAndErrFile) throws InterruptedException, IOException {
 		try {
-			if (SystemUtils.IS_OS_HP_UX) {
-				return executeOnHpUx(processBuilder, outAndErrFile).syncExecute();
-			}
-			return executeOnOthers(processBuilder, outAndErrFile).syncExecute();
+			return buildProcessExecutor(processBuilder, outAndErrFile).syncExecute();
 		} catch (ExecutionException e) {
 			log.error(e.getMessage(), e);
 			return 600;
@@ -57,21 +46,10 @@ public final class ProcessBuilderExecutor {
 	}
 
 	public static Process asyncExecute(final ProcessBuilder processBuilder, final File outAndErrFile) throws InterruptedException, IOException {
-		if (SystemUtils.IS_OS_HP_UX) {
-			return executeOnHpUx(processBuilder, outAndErrFile).asyncExecute();
-		}
-		return executeOnOthers(processBuilder, outAndErrFile).asyncExecute();
+		return buildProcessExecutor(processBuilder, outAndErrFile).asyncExecute();
 	}
 
-	private static ProcessExecutor executeOnHpUx(final ProcessBuilder processBuilder, final File outAndErrFile) throws FileNotFoundException {
-		return ProcessExecutor.builder().processBuilder(processBuilder)
-				.redirectError(outAndErrFile != null)
-				.outputStream(outAndErrFile != null ? new FileOutputStream(outAndErrFile) : System.out)
-				.errorStream(outAndErrFile != null ? null : System.err)
-				.build();
-	}
-
-	private static ProcessExecutor executeOnOthers(final ProcessBuilder processBuilder, final File outAndErrFile) throws IOException {
+	private static ProcessExecutor buildProcessExecutor(final ProcessBuilder processBuilder, final File outAndErrFile) throws IOException {
 		return ProcessExecutor.builder().processBuilder(processBuilder)
 				.redirectError(outAndErrFile != null)
 				.outputStream(outAndErrFile != null ? new FileOutputStream(outAndErrFile) : null)

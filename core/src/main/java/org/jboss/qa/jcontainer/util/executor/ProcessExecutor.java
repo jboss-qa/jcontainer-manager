@@ -15,6 +15,8 @@
  */
 package org.jboss.qa.jcontainer.util.executor;
 
+import org.apache.commons.lang.SystemUtils;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -42,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 public class ProcessExecutor {
 
 	@Singular
-	@NonNull
 	private List<String> commands;
 	private OutputStream outputStream;
 	private OutputStream errorStream;
@@ -55,17 +56,23 @@ public class ProcessExecutor {
 	}
 
 	public Process asyncExecute() throws IOException {
-		final Pipe pipe = Pipe.open();
-
 		if (processBuilder == null) {
 			processBuilder = new ProcessBuilder(commands);
 		}
 
 		if (outputStream == null) {
-			processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			if (SystemUtils.IS_OS_HP_UX) {
+				outputStream = System.out;
+			} else {
+				processBuilder.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+			}
 		}
 		if (errorStream == null && !redirectError) {
-			processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			if (SystemUtils.IS_OS_HP_UX) {
+				outputStream = System.err;
+			} else {
+				processBuilder.redirectError(ProcessBuilder.Redirect.INHERIT);
+			}
 		}
 		processBuilder.redirectErrorStream(redirectError);
 
@@ -75,10 +82,12 @@ public class ProcessExecutor {
 		final List<Future> futures = new ArrayList<>();
 
 		if (outputStream != null) {
+			final Pipe pipe = Pipe.open();
 			futures.add(executeService.submit(new CopyIntoChannel(Channels.newChannel(process.getInputStream()), pipe.sink())));
 			futures.add(executeService.submit(new CopyIntoChannel(pipe.source(), Channels.newChannel(outputStream))));
 		}
 		if (errorStream != null && !redirectError) {
+			final Pipe pipe = Pipe.open();
 			futures.add(executeService.submit(new CopyIntoChannel(Channels.newChannel(process.getErrorStream()), pipe.sink())));
 			futures.add(executeService.submit(new CopyIntoChannel(pipe.source(), Channels.newChannel(errorStream))));
 		}
@@ -86,13 +95,11 @@ public class ProcessExecutor {
 		final Future<Integer> future = executeService.submit(new Callable<Integer>() {
 			@Override
 			public Integer call() throws Exception {
-				synchronized (process) {
-					process.waitFor();
-					for (Future f : futures) {
-						f.get();
-					}
-					return process.exitValue();
+				process.waitFor();
+				for (Future f : futures) {
+					f.get();
 				}
+				return process.exitValue();
 			}
 		});
 
@@ -111,23 +118,17 @@ public class ProcessExecutor {
 
 		@Override
 		public OutputStream getOutputStream() {
-			synchronized (process) {
-				return process.getOutputStream();
-			}
+			return process.getOutputStream();
 		}
 
 		@Override
 		public InputStream getInputStream() {
-			synchronized (process) {
-				return process.getInputStream();
-			}
+			return process.getInputStream();
 		}
 
 		@Override
 		public InputStream getErrorStream() {
-			synchronized (process) {
-				return process.getErrorStream();
-			}
+			return process.getErrorStream();
 		}
 
 		@Override
@@ -142,16 +143,12 @@ public class ProcessExecutor {
 
 		@Override
 		public int exitValue() {
-			synchronized (process) {
-				return process.exitValue();
-			}
+			return process.exitValue();
 		}
 
 		@Override
 		public void destroy() {
-			synchronized (process) {
-				process.destroy();
-			}
+			process.destroy();
 		}
 	}
 
