@@ -92,8 +92,9 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 			@Override
 			public void run() {
 				try {
-					while (ProcessUtils.getJavaPidByContainerId(getId()) != null) {
-						log.debug("Stopping container...");
+					String pid;
+					while ((pid = ProcessUtils.getJavaPidByContainerId(getId())) != null) {
+						log.debug("Stopping container (PID {}) ...", pid);
 						Thread.sleep(TimeUnit.SECONDS.toMillis(1));
 					}
 				} catch (InterruptedException e) {

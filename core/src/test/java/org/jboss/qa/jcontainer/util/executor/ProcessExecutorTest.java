@@ -26,13 +26,13 @@ public class ProcessExecutorTest extends AbstractProcessBuilderExecutorTest {
 
 	@Test
 	public void processExecutor() throws IOException, InterruptedException, ExecutionException {
-		final ProcessExecutor ep = ProcessExecutor.builder().commands(commands).build();
+		final ProcessExecutor ep = ProcessExecutor.builder().commands(commands).redirectError(true).build();
 		assertEquals(0, ep.syncExecute());
 	}
 
 	@Test
 	public void processExecutorWithSeparateErrorStream() throws IOException, ExecutionException, InterruptedException {
-		final ProcessExecutor ep = ProcessExecutor.builder().commands(commands).redirectError(false).build();
+		final ProcessExecutor ep = ProcessExecutor.builder().commands(commands).build();
 		final Process future = ep.asyncExecute();
 		assertEquals(0, future.waitFor());
 	}
