@@ -35,7 +35,7 @@ public class AbstractProcessBuilderExecutorTest {
 	public static final String OUTPUT_TEXT = "output text";
 	public static final String ERROR_TEXT = "error text";
 
-	public static final String EXPECTED_RESULT = OUTPUT_TEXT + "\n" + ERROR_TEXT + "\n";
+	public static final String EXPECTED_RESULT = OUTPUT_TEXT + System.lineSeparator() + ERROR_TEXT + System.lineSeparator();
 
 	protected static List<String> commands;
 

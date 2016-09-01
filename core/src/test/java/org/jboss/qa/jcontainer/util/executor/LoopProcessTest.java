@@ -20,8 +20,8 @@ import static org.apache.commons.io.FileUtils.getFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
-import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.SystemUtils;
@@ -90,6 +90,6 @@ public class LoopProcessTest {
 		log.info("Terminate process");
 		process.destroy();
 		assertEquals(0, process.waitFor());
-		assertThat(FileUtils.readFileToString(file), allOf(containsString("Sleep over")));
+		assertThat(FileUtils.readFileToString(file), is(containsString("Sleep over")));
 	}
 }

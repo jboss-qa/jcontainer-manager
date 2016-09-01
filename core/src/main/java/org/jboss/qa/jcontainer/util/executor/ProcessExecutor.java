@@ -103,7 +103,7 @@ public class ProcessExecutor {
 			}
 		});
 
-		final Process proxyProcess = new ProxyProcess(process, future);
+		final Process proxyProcess = new ProcessWrapper(process, future);
 
 		executeService.shutdown();
 		return proxyProcess;
@@ -111,7 +111,9 @@ public class ProcessExecutor {
 
 	@Slf4j
 	@AllArgsConstructor
-	static class ProxyProcess extends Process {
+	static class ProcessWrapper extends Process {
+
+		public static final int EXECUTION_ERROR_RETURN_CODE = 500;
 
 		private Process process;
 		private Future<Integer> future;
@@ -137,7 +139,7 @@ public class ProcessExecutor {
 				return future.get();
 			} catch (ExecutionException e) {
 				log.error(e.getMessage(), e);
-				return 500;
+				return EXECUTION_ERROR_RETURN_CODE;
 			}
 		}
 

@@ -25,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public final class ProcessBuilderExecutor {
 
+	public static final int EXECUTION_ERROR_RETURN_CODE = 600;
+
 	private ProcessBuilderExecutor() {
 	}
 
@@ -37,7 +39,7 @@ public final class ProcessBuilderExecutor {
 			return buildProcessExecutor(processBuilder, outAndErrFile).syncExecute();
 		} catch (ExecutionException e) {
 			log.error(e.getMessage(), e);
-			return 600;
+			return EXECUTION_ERROR_RETURN_CODE;
 		}
 	}
 
