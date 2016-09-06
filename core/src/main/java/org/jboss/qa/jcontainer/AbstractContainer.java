@@ -15,6 +15,7 @@
  */
 package org.jboss.qa.jcontainer;
 
+import org.jboss.qa.jcontainer.util.ProcessUtils;
 import org.jboss.qa.jcontainer.util.ReflectionUtils;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
@@ -138,6 +139,22 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 					} catch (InterruptedException e) {
 						throw new IllegalStateException("Container was not stopped", e);
 					}
+				}
+			}
+		}));
+		// This shutdown hook wait until container process exists.
+		addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					String pid;
+					while ((pid = ProcessUtils.getJavaPidByContainerId(getId())) != null) {
+						log.debug("Stopping container (PID {}) ...", pid);
+						Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+					}
+				} catch (InterruptedException e) {
+					log.trace(e.getMessage(), e);
+					Thread.currentThread().interrupt();
 				}
 			}
 		}));
