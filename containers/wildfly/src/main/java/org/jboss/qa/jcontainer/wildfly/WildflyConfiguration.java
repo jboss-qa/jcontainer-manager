@@ -168,7 +168,7 @@ public class WildflyConfiguration extends Configuration {
 			}
 
 			// Set JAVA_OPTS
-			final StringBuffer javaOpts = new StringBuffer();
+			final StringBuilder javaOpts = new StringBuilder();
 			if (!StringUtils.isEmpty(xms)) {
 				javaOpts.append(" -Xms").append(xms);
 			}

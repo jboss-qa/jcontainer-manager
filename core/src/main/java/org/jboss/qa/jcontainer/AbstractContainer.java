@@ -131,13 +131,16 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 		final Process process = ProcessBuilderExecutor.asyncExecute(processBuilder, getStdoutLogFile());
 
 		addShutdownHook(new Thread(new Runnable() {
+			@Override
 			public void run() {
 				if (process != null) {
 					process.destroy();
 					try {
 						process.waitFor();
 					} catch (InterruptedException e) {
-						throw new IllegalStateException("Container was not stopped", e);
+						log.debug("Container stop process was interrupted!");
+						log.trace(e.getMessage(), e);
+						Thread.currentThread().interrupt();
 					}
 				}
 			}
@@ -175,7 +178,7 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 				for (Future future : futures) {
 					future.cancel(true);
 				}
-				log.error("Container shutdown process didn't finish in {} {}!", timeout, timeUnit);
+				log.warn("Container shutdown process didn't finish in {} {}!", timeout, timeUnit);
 			} else {
 				log.info("Container was stopped");
 			}
@@ -208,7 +211,7 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 			if (--attempts <= 0) {
 				throw new IllegalStateException("Container was not started");
 			}
-			Thread.sleep(TimeUnit.SECONDS.toMillis(5));
+			wait(TimeUnit.SECONDS.toMillis(5));
 			log.info("Waiting for container...");
 		}
 		checkClient();
@@ -227,6 +230,7 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 					return;
 				} catch (Exception e) {
 					log.debug("Waiting for client...");
+					log.trace(e.getMessage(), e);
 				}
 			}
 			throw new IllegalStateException("Client was not connected to container");
@@ -242,6 +246,7 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 		try (Socket socket = new Socket(configuration.getHost(), configuration.getBusyPort())) {
 			return true;
 		} catch (Exception e) {
+			log.trace(e.getMessage(), e);
 			return false;
 		}
 	}
@@ -261,6 +266,7 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 			return clientClass.getConstructor(confClass).newInstance(configuration);
 		} catch (Exception e) {
 			log.error("Client was not created");
+			log.trace(e.getMessage(), e);
 		}
 		return null;
 	}

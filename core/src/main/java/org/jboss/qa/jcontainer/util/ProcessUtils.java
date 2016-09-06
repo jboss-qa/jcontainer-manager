@@ -130,7 +130,7 @@ public final class ProcessUtils {
 
 	public static void kill(String pid) {
 		if (pid != null && !pid.isEmpty()) {
-			String cmd = null;
+			final String cmd;
 			if (SystemUtils.IS_OS_WINDOWS) {
 				cmd = "taskkill /F /T /PID " + pid;
 			} else { // UNIX-like

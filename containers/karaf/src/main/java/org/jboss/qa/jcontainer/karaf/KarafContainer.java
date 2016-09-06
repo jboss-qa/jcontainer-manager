@@ -64,11 +64,12 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 	public synchronized void start() throws Exception {
 		final File setEnvFile = new File(configuration.getDirectory(), "bin" + File.separator
 				+ (SystemUtils.IS_OS_WINDOWS ? "setenv.bat" : "setenv"));
-		if (setEnvFile != null && setEnvFile.exists()) {
+		if (setEnvFile.exists()) {
 			final File setEnvBacFile = new File(setEnvFile.getAbsolutePath() + ".backup");
-			setEnvFile.renameTo(setEnvBacFile);
-			log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
-					setEnvFile.getName(), setEnvBacFile.getName());
+			if (setEnvFile.renameTo(setEnvBacFile)) {
+				log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
+						setEnvFile.getName(), setEnvBacFile.getName());
+			}
 		}
 		if (getConfiguration().getSshPort() != KarafConfiguration.DEFAULT_SSH_PORT) {
 			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell");
@@ -76,6 +77,7 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		configuration.getEnvProps().put("KARAF_REDIRECT", getStdoutLogFile().getAbsolutePath());
 		super.start();
 		addShutdownHook(new Thread(new Runnable() {
+			@Override
 			public void run() {
 				log.debug("Start shutdown sequence.");
 				try {
