@@ -15,8 +15,6 @@
  */
 package org.jboss.qa.jcontainer.util;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.AbstractContainer;
@@ -49,7 +47,6 @@ public final class ProcessUtils {
 
 	public static void killJavaByContainerId(long id) {
 		final String pid = getJavaPidByContainerId(id);
-		log.debug("Container {} has pid {}", id, pid);
 		if (pid != null) {
 			kill(pid);
 		} else {
@@ -95,27 +92,37 @@ public final class ProcessUtils {
 	private static String getJavaPidByContainerIdWindows(long id) {
 		String result = null;
 		try {
-			final Process p = Runtime.getRuntime().exec("wmic process where \"not name='wmic.exe' and CommandLine like '%-D"
-					+ AbstractContainer.JCONTAINER_ID + "=" + id + "%'\" get ProcessID");
-
-			final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
-			String line;
-			while ((line = is.readLine()) != null) {
-				if (!line.contains("ProcessId")) {
-					if (result == null || result.isEmpty()) {
-						result = line;
+			final Long currentPid = PidUtils.getPID();
+			for (Map.Entry<String, String> entry : getJavaProcesses().entrySet()) {
+				final String pid = entry.getKey();
+				if (currentPid != null && String.valueOf(currentPid).equals(pid)) {
+					//it freezes jvm on Windows
+					log.debug("We are not going to execute jinfo for our pid " + currentPid);
+					continue;
+				}
+				final String command = "jinfo -sysprops " + pid;
+				log.info("Executing: " + command);
+				final Process p = Runtime.getRuntime().exec(command);
+				final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line;
+				while ((line = is.readLine()) != null) {
+					if (result == null && line.contains(AbstractContainer.JCONTAINER_ID) && line.contains(String.valueOf(id))) {
+						result = pid;
+						//Don't break it here. We need to consume whole STDOUT of executed command.
 					}
 				}
-			}
-			final int exitValue = p.waitFor();
-			if (exitValue != 0) {
-				log.error("Process 'wmic' ended with exit value {}", exitValue);
-				log.debug("Process 'wmic' error stream: {}", IOUtils.toString(p.getErrorStream()));
+				final int exitValue = p.waitFor();
+				if (exitValue != 0) {
+					log.error("Process 'jinfo' ended with exit value {}", exitValue);
+				}
+				if (result != null) {
+					break;
+				}
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		return StringUtils.trimToNull(result);
+		return result;
 	}
 
 	public static List<String> getJavaPidsByName(String processName) {
@@ -142,7 +149,6 @@ public final class ProcessUtils {
 					log.info("Process {} was killed", pid);
 				} else {
 					log.error("Process {} was not killed", pid);
-					log.debug("Error stream: {}", IOUtils.toString(p.getErrorStream()));
 				}
 			} catch (Exception e) {
 				log.error(e.getMessage(), e);
@@ -154,8 +160,6 @@ public final class ProcessUtils {
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
-		} else {
-			log.debug("Unable kill process because PID is Null or Empty!");
 		}
 	}
 
@@ -163,19 +167,19 @@ public final class ProcessUtils {
 		final Map<String, String> pids = new HashMap<>();
 		try {
 			final Process p = Runtime.getRuntime().exec("jps -l");
-			final List<String> lines = IOUtils.readLines(p.getInputStream());
+			final BufferedReader inStream = new BufferedReader(new InputStreamReader(p.getInputStream()));
 			final String pattern = "(\\d+)\\s+(.*)";
 			final Pattern r = Pattern.compile(pattern);
-			final int exitValue = p.waitFor();
-			if (exitValue != 0) {
-				log.error("Process 'jps' ended with exit value {}", exitValue);
-				log.debug("Process 'jps' error stream: {}", IOUtils.toString(p.getErrorStream()));
-			}
-			for (String line : lines) {
+			String line;
+			while ((line = inStream.readLine()) != null) {
 				final Matcher m = r.matcher(line);
 				if (m.find()) {
 					pids.put(m.group(1), m.group(2));
 				}
+			}
+			final int exitValue = p.waitFor();
+			if (exitValue != 0) {
+				log.error("Process 'jps' ended with exit value {}", exitValue);
 			}
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

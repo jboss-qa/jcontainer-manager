@@ -77,7 +77,6 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		super.start();
 		addShutdownHook(new Thread(new Runnable() {
 			public void run() {
-				log.debug("Start shutdown sequence.");
 				try {
 					final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateStopCommand());
 					ProcessBuilderExecutor.syncExecute(processBuilder);
