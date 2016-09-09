@@ -158,7 +158,7 @@ public class KarafClient<T extends KarafConfiguration> extends Client<T> {
 				}
 			}
 			return agent;
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			log.error("Error starting ssh agent for: " + e.getMessage(), e);
 			return null;
 		}

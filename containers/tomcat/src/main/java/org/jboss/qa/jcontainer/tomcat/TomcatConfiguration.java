@@ -93,7 +93,7 @@ public class TomcatConfiguration extends Configuration {
 
 		public TomcatConfiguration build() {
 			// Set CATALINA_OPTS
-			final StringBuffer catalinaOpts = new StringBuffer();
+			final StringBuilder catalinaOpts = new StringBuilder();
 			if (!StringUtils.isEmpty(xms)) {
 				catalinaOpts.append(" -Xms" + xms);
 			}

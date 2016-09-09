@@ -64,6 +64,7 @@ public class WildflyClient<T extends WildflyConfiguration> extends Client<T> {
 		try {
 			lastResult = client.execute(command);
 		} catch (CliException e) {
+			log.trace(e.getMessage(), e);
 			if (e.getCause().getClass().isAssignableFrom(OperationFormatException.class)) {
 				// Workaround for unsupported commands by Wildfly Creaper project
 				client.executeCli(command);

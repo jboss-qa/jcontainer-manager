@@ -10,15 +10,15 @@
 
 	<name>JContainer Manager</name>
 	<description>Manager of java containers</description>
-	<url>https://github.com/jboss-soa-qa/jcontainer-manager</url>
+	<url>https://github.com/jboss-qa/jcontainer-manager</url>
 	<issueManagement>
-		<url>https://github.com/jboss-soa-qa/jcontainer-manager/issues</url>
+		<url>https://github.com/jboss-qa/jcontainer-manager/issues</url>
 		<system>GitHub Issues</system>
 	</issueManagement>
 
 	<ciManagement>
 		<system>Travis CI</system>
-		<url>https://travis-ci.org/jboss-soa-qa/jcontainer-manager</url>
+		<url>https://travis-ci.org/jboss-qa/jcontainer-manager</url>
 	</ciManagement>
 
 	<licenses>
@@ -30,9 +30,9 @@
 	</licenses>
 
 	<scm>
-		<url>https://github.com/jboss-soa-qa/jcontainer-manager</url>
-		<connection>scm:git:git://github.com/jboss-soa-qa/jcontainer-manager.git</connection>
-		<developerConnection>scm:git:git@github.com:jboss-soa-qa/jcontainer-manager.git</developerConnection>
+		<url>https://github.com/jboss-qa/jcontainer-manager</url>
+		<connection>scm:git:git://github.com/jboss-qa/jcontainer-manager.git</connection>
+		<developerConnection>scm:git:git@github.com:jboss-qa/jcontainer-manager.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 
