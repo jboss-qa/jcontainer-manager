@@ -15,12 +15,22 @@
  */
 package org.jboss.qa.jcontainer.fuse.test;
 
+import static org.awaitility.Awaitility.await;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.fuse.FuseClient;
 import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
 import org.jboss.qa.jcontainer.fuse.FuseContainer;
 import org.jboss.qa.jcontainer.fuse.FuseUser;
 import org.jboss.qa.jcontainer.karaf.BaseKarafContainerTest;
+import org.jboss.qa.jcontainer.karaf.KarafConfiguration;
+import org.jboss.qa.jcontainer.karaf.KarafContainer;
+import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -28,8 +38,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,7 +61,16 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 		user.setPassword(conf.getPassword());
 		user.addRoles("admin", "SuperUser");
 		container.addUser(user);
+		awaitContainerIsNotRunning(container);
 		container.start();
+	}
+
+	@AfterClass
+	public static void afterClass() throws Exception {
+		if (container != null) {
+			container.stop();
+			awaitContainerIsNotRunning(container);
+		}
 	}
 
 	@Test
@@ -85,6 +107,27 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}
+	}
+
+	public static void awaitContainerIsNotRunning(KarafContainer<KarafConfiguration, ?, ?> container) {
+		try {
+			await().atMost(20, TimeUnit.SECONDS)
+					.until(containerIsRunning(container.getConfiguration()), is(equalTo(false)));
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+	}
+
+	public static Callable<Boolean> containerIsRunning(final KarafConfiguration configuration) throws Exception {
+		return new Callable<Boolean>() {
+			@Override
+			public Boolean call() throws Exception {
+				final File status = new File(configuration.getDirectory(), "bin" + File.separator
+						+ (SystemUtils.IS_OS_WINDOWS ? "status.bat" : "status"));
+				final ProcessBuilder processBuilder = new ProcessBuilder(configuration.generateCommand(status));
+				return ProcessBuilderExecutor.syncExecute(processBuilder) == 0;
+			}
+		};
 	}
 }
 
