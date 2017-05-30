@@ -26,6 +26,10 @@ environment:
       URL: http://download.jboss.org/wildfly/10.0.0.Final/wildfly-10.0.0.Final.zip
       CONTAINER_ZIP: wildfly-10.0.0.Final.zip
       CONTAINER_HOME: wildfly-10.0.0.Final
+    - CONTAINER: wildfly
+      URL: http://download.jboss.org/wildfly/11.0.0.Alpha1/wildfly-11.0.0.Alpha1.zip
+      CONTAINER_ZIP: wildfly-11.0.0.Alpha1.zip
+      CONTAINER_HOME: wildfly-11.0.0.Alpha1
     - CONTAINER: fuse
       URL: http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/6.2.1.redhat-143/jboss-fuse-full-6.2.1.redhat-143.zip
       CONTAINER_ZIP: jboss-fuse-full-6.2.1.redhat-143.zip
