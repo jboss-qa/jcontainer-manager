@@ -15,6 +15,8 @@
  */
 package org.jboss.qa.jcontainer.fuse;
 
+import org.jboss.qa.jcontainer.fuse.strategy.command.FuseCommandFactory;
+import org.jboss.qa.jcontainer.fuse.strategy.command.FuseCommandStrategy;
 import org.jboss.qa.jcontainer.karaf.KarafContainer;
 import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
 
@@ -26,13 +28,22 @@ import lombok.extern.slf4j.Slf4j;
 public class FuseContainer<T extends FuseConfiguration, U extends FuseClient<T>, V extends FuseUser>
 		extends KarafContainer<T, U, V> {
 
+	private FuseCommandFactory commandFactory;
+
 	public FuseContainer(T configuration) {
 		super(configuration);
 	}
 
 	@Override
 	protected File getLogDirInternal() {
-		return new File(CoreUtils.getSystemProperty(client, "karaf.data", "dev:system-property"), "log");
+		return new File(CoreUtils.getSystemProperty(client, "karaf.data", getCommandStrategy().systemProperty()), "log");
+	}
+
+	private FuseCommandStrategy getCommandStrategy() {
+		if (commandFactory == null) {
+			commandFactory = new FuseCommandFactory(client);
+		}
+		return commandFactory.getStrategy();
 	}
 }
 
