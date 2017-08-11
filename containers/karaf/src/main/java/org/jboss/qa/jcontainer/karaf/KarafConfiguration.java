@@ -32,6 +32,7 @@ public class KarafConfiguration extends Configuration {
 
 	public static final int DEFAULT_HTTP_PORT = 8181;
 	public static final int DEFAULT_SSH_PORT = 8101;
+	public static final int DEFAULT_FUSE_VERSION = -1;
 
 	@Getter
 	protected final int httpPort;
@@ -41,6 +42,8 @@ public class KarafConfiguration extends Configuration {
 	protected final File keyFile;
 	protected final File script;
 	protected final File stopScript;
+	@Getter
+	protected final int version;
 
 	protected KarafConfiguration(Builder<?> builder) {
 		super(builder);
@@ -50,6 +53,7 @@ public class KarafConfiguration extends Configuration {
 		sshPort = builder.sshPort;
 		//Optional
 		keyFile = builder.keyFile;
+		version = builder.version;
 	}
 
 	@Override
@@ -97,6 +101,7 @@ public class KarafConfiguration extends Configuration {
 		protected File keyFile;
 		protected File script;
 		protected File stopScript;
+		protected int version;
 
 		public Builder() {
 			httpPort = DEFAULT_HTTP_PORT;
@@ -104,6 +109,7 @@ public class KarafConfiguration extends Configuration {
 			username = "karaf";
 			password = "karaf";
 			logFileName = "karaf.log";
+			version = DEFAULT_FUSE_VERSION;
 		}
 
 		public T httpPort(int httpPort) {
@@ -118,6 +124,11 @@ public class KarafConfiguration extends Configuration {
 
 		public T keyFile(String keyFile) {
 			this.keyFile = new File(keyFile);
+			return self();
+		}
+
+		public T version(int version) {
+			this.version = version;
 			return self();
 		}
 
