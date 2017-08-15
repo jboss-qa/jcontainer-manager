@@ -17,7 +17,7 @@ read -r -p "Release details:
 * releaseVersion = $RELEASE_VERSION
 * developmentVersion = $DEVEL_VERSION
 Are you sure? [y/N]: " response
-response=${response,,} # tolower
+response=$(echo $response | tr '[:upper:]' '[:lower:]') # tolower
 
 if [[ $response =~ ^(yes|y) ]]; then
 	git checkout develop
