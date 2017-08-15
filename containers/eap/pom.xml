@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.jboss.qa.jcontainer.containers</groupId>
 		<artifactId>containers-parent</artifactId>
-		<version>1.2.4</version>
+		<version>1.2.5-SNAPSHOT</version>
 	</parent>
 	<artifactId>eap</artifactId>
 	<name>JContainer Manager :: Containers :: JBoss EAP</name>
