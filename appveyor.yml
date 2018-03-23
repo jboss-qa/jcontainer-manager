@@ -31,9 +31,9 @@ environment:
       CONTAINER_ZIP: wildfly-11.0.0.Alpha1.zip
       CONTAINER_HOME: wildfly-11.0.0.Alpha1
     - CONTAINER: fuse
-      URL: http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/6.2.1.redhat-143/jboss-fuse-full-6.2.1.redhat-143.zip
-      CONTAINER_ZIP: jboss-fuse-full-6.2.1.redhat-143.zip
-      CONTAINER_HOME: jboss-fuse-6.2.1.redhat-143
+      URL: http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/6.2.1.redhat-216-08/jboss-fuse-full-6.2.1.redhat-216-08.zip
+      CONTAINER_ZIP: jboss-fuse-full-6.2.1.redhat-216-08.zip
+      CONTAINER_HOME: jboss-fuse-6.2.1.redhat-216-08
 install:
   - SET PATH=%JAVA_HOME%\bin;%PATH%
   - cinst maven
