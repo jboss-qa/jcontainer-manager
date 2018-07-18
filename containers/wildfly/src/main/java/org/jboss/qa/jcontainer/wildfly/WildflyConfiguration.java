@@ -116,6 +116,7 @@ public class WildflyConfiguration extends Configuration {
 		protected File baseDir;
 		protected File script;
 		protected String nodeName;
+		protected StringBuilder javaOpts;
 
 		public Builder() {
 			xms = "64m";
@@ -157,6 +158,14 @@ public class WildflyConfiguration extends Configuration {
 			return self();
 		}
 
+		public T javaOpt(String opt) {
+			if (javaOpts == null) {
+				javaOpts = new StringBuilder();
+			}
+			this.javaOpts.append(" ").append(opt);
+			return self();
+		}
+
 		public WildflyConfiguration build() {
 			// Set script
 			if (mode.equals(Mode.STANDALONE)) {
@@ -168,30 +177,30 @@ public class WildflyConfiguration extends Configuration {
 			}
 
 			// Set JAVA_OPTS
-			final StringBuilder javaOpts = new StringBuilder();
+			final StringBuilder allJavaOpts = javaOpts == null ? new StringBuilder() : javaOpts;
 			if (!StringUtils.isEmpty(xms)) {
-				javaOpts.append(" -Xms").append(xms);
+				allJavaOpts.append(" -Xms").append(xms);
 			}
 			if (!StringUtils.isEmpty(xmx)) {
-				javaOpts.append(" -Xmx").append(xmx);
+				allJavaOpts.append(" -Xmx").append(xmx);
 			}
 			if (!StringUtils.isEmpty(permSize)) {
-				javaOpts.append(" -XX:PermSize=").append(permSize);
+				allJavaOpts.append(" -XX:PermSize=").append(permSize);
 			}
 			if (!StringUtils.isEmpty(maxPermSize)) {
-				javaOpts.append(" -XX:MaxPermSize=").append(maxPermSize);
+				allJavaOpts.append(" -XX:MaxPermSize=").append(maxPermSize);
 			}
-			javaOpts.append(" -Djava.net.preferIPv4Stack=true");
-			javaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
-			javaOpts.append(" -Djava.awt.headless=true");
-			javaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
+			allJavaOpts.append(" -Djava.net.preferIPv4Stack=true");
+			allJavaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
+			allJavaOpts.append(" -Djava.awt.headless=true");
+			allJavaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
 			if (baseDir != null) {
-				javaOpts.append(" -Djboss.server.base.dir=").append(baseDir);
+				allJavaOpts.append(" -Djboss.server.base.dir=").append(baseDir);
 			}
 			if (nodeName != null) {
-				javaOpts.append(" -Djboss.node.name=").append(nodeName);
+				allJavaOpts.append(" -Djboss.node.name=").append(nodeName);
 			}
-			envProps.put("JAVA_OPTS", javaOpts.toString());
+			envProps.put("JAVA_OPTS", allJavaOpts.toString());
 
 			return new WildflyConfiguration(this);
 		}
