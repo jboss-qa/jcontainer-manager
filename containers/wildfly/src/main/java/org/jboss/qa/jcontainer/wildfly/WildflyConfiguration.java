@@ -20,8 +20,11 @@ import org.apache.commons.lang3.SystemUtils;
 
 import org.jboss.qa.jcontainer.Configuration;
 
+import com.google.common.base.Joiner;
+
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
@@ -116,7 +119,7 @@ public class WildflyConfiguration extends Configuration {
 		protected File baseDir;
 		protected File script;
 		protected String nodeName;
-		protected StringBuilder javaOpts;
+		protected List<String> javaOpts;
 
 		public Builder() {
 			xms = "64m";
@@ -126,6 +129,7 @@ public class WildflyConfiguration extends Configuration {
 			profile = "standalone.xml";
 			mode = Mode.STANDALONE;
 			logFileName = "server.log";
+			javaOpts = System.getenv(Configuration.JAVA_OPTS_ENV_NAME) == null ? new ArrayList<String>() : new ArrayList<>(Arrays.asList(System.getenv(Configuration.JAVA_OPTS_ENV_NAME).split("(?=\\s-)")));
 		}
 
 		public T portOffset(int portOffset) {
@@ -159,10 +163,7 @@ public class WildflyConfiguration extends Configuration {
 		}
 
 		public T javaOpt(String opt) {
-			if (javaOpts == null) {
-				javaOpts = new StringBuilder();
-			}
-			this.javaOpts.append(" ").append(opt);
+			javaOpts.add(opt);
 			return self();
 		}
 
@@ -176,33 +177,55 @@ public class WildflyConfiguration extends Configuration {
 						+ (SystemUtils.IS_OS_WINDOWS ? "domain.bat" : "domain.sh"));
 			}
 
+			// get rid of spaces before/after option
+			for (int i = 0; i < javaOpts.size(); i++) {
+				javaOpts.set(i, javaOpts.get(i).replaceAll("\\s", ""));
+			}
 			// Set JAVA_OPTS
-			final StringBuilder allJavaOpts = javaOpts == null ? new StringBuilder() : javaOpts;
 			if (!StringUtils.isEmpty(xms)) {
-				allJavaOpts.append(" -Xms").append(xms);
+				replaceJavaOptIfExists("-Xms", xms);
 			}
 			if (!StringUtils.isEmpty(xmx)) {
-				allJavaOpts.append(" -Xmx").append(xmx);
+				replaceJavaOptIfExists("-Xmx", xmx);
 			}
 			if (!StringUtils.isEmpty(permSize)) {
-				allJavaOpts.append(" -XX:PermSize=").append(permSize);
+				replaceJavaOptIfExists("-XX:PermSize=", permSize);
 			}
 			if (!StringUtils.isEmpty(maxPermSize)) {
-				allJavaOpts.append(" -XX:MaxPermSize=").append(maxPermSize);
+				replaceJavaOptIfExists("-XX:MaxPermSize=", maxPermSize);
 			}
-			allJavaOpts.append(" -Djava.net.preferIPv4Stack=true");
-			allJavaOpts.append(" -Djboss.modules.system.pkgs=org.jboss.byteman");
-			allJavaOpts.append(" -Djava.awt.headless=true");
-			allJavaOpts.append(" -Djboss.socket.binding.port-offset=").append(portOffset);
 			if (baseDir != null) {
-				allJavaOpts.append(" -Djboss.server.base.dir=").append(baseDir);
+				replaceJavaOptIfExists("-Djboss.server.base.dir=", baseDir.toString());
 			}
 			if (nodeName != null) {
-				allJavaOpts.append(" -Djboss.node.name=").append(nodeName);
+				replaceJavaOptIfExists("-Djboss.node.name=", nodeName);
 			}
-			envProps.put("JAVA_OPTS", allJavaOpts.toString());
+			addJavaOptIfNotExists("-Djava.net.preferIPv4Stack=", "true");
+			addJavaOptIfNotExists("-Djboss.modules.system.pkgs=", "org.jboss.byteman");
+			addJavaOptIfNotExists("-Djava.awt.headless=", "true");
+			addJavaOptIfNotExists("-Djboss.socket.binding.port-offset=", String.valueOf(portOffset));
+
+			envProps.put(Configuration.JAVA_OPTS_ENV_NAME, Joiner.on(" ").join(javaOpts));
 
 			return new WildflyConfiguration(this);
+		}
+
+		private void replaceJavaOptIfExists(String prefix, String value) {
+			for (int i = 0; i < javaOpts.size(); i++) {
+				if (javaOpts.get(i).startsWith(prefix)) {
+					javaOpts.remove(i);
+				}
+			}
+			javaOpts.add(prefix + value);
+		}
+
+		private void addJavaOptIfNotExists(String prefix, String value) {
+			for (int i = 0; i < javaOpts.size(); i++) {
+				if (javaOpts.get(i).startsWith(prefix)) {
+					return;
+				}
+			}
+			javaOpts.add(prefix + value);
 		}
 	}
 
