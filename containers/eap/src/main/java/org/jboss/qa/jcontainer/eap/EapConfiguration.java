@@ -42,15 +42,8 @@ public class EapConfiguration extends WildflyConfiguration {
 		}
 
 		public EapConfiguration build() {
+			javaOpt("-Djboss.modules.policy-permissions=true");
 			super.build();
-			// Set JAVA_OPTS
-			final StringBuilder allJavaOpts = new StringBuilder();
-			final String oldJavaOpts = envProps.get(JAVA_OPTS_ENV_NAME);
-			if (oldJavaOpts != null) {
-				allJavaOpts.append(oldJavaOpts);
-			}
-			allJavaOpts.append(" -Djboss.modules.policy-permissions=true");
-			envProps.put(JAVA_OPTS_ENV_NAME, allJavaOpts.toString());
 			return new EapConfiguration(this);
 		}
 	}
