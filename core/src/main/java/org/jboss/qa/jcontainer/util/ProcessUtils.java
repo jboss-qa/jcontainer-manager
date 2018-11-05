@@ -47,6 +47,28 @@ public final class ProcessUtils {
 		}
 	}
 
+	public static void killAllJavaContainerProcesses(long id) {
+		final String pid = getJavaPidByContainerId(id);
+		log.debug("Container {} has pid {}", id, pid);
+		// get parent pid before we kill the child process
+		final String parentPid = getParentPidOfPid(pid);
+		log.debug("Container {} has parentPid {}", id, parentPid);
+		if (pid != null) {
+			kill(pid);
+		} else {
+			log.error("Java process representing container with id {} was not found", id);
+		}
+		// remove parent standalone.sh process of java container process which was not destroyed via process.destroy() call
+		final String ensureParentPidEapProcessCommand = String.format("ps aux | awk '$2 == \"%s\"' | grep \"standalone.sh\" | awk '{print $2}'", parentPid);
+		final String parentPidViaEapGrep = executeCommandUnix(ensureParentPidEapProcessCommand);
+		log.debug("Parent process standalone.sh has pid '{}' and found pid via another grep '{}'", parentPid, parentPidViaEapGrep);
+		if (parentPid != null && parentPid.equals(parentPidViaEapGrep)) {
+			kill(parentPid);
+		} else {
+			log.error("Parent process standalone.sh which run java process container with id {} was not found", id);
+		}
+	}
+
 	public static void killJavaByContainerId(long id) {
 		final String pid = getJavaPidByContainerId(id);
 		log.debug("Container {} has pid {}", id, pid);
@@ -65,8 +87,17 @@ public final class ProcessUtils {
 		}
 	}
 
+	public static String getParentPidOfPid(String pid) {
+		final String command = String.format("ps -ef | awk '$2 == \"%s\"' | awk '{print $3}'", pid);
+		return executeCommandUnix(command);
+	}
+
 	private static String getJavaPidByContainerIdUnix(long id) {
 		final String command = String.format("ps -ef | grep \\\\-Djcontainer.id=%d | grep -v grep | grep -v \"/bin/bash\" | awk '{print $2}'", id);
+		return executeCommandUnix(command);
+	}
+
+	private static String executeCommandUnix(final String command) {
 		try {
 			final Process p = Runtime.getRuntime().exec(new String[] {"bash", "-c", command});
 			try (final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
