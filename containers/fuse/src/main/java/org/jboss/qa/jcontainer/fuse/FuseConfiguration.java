@@ -30,13 +30,14 @@ public class FuseConfiguration extends KarafConfiguration {
 	public abstract static class Builder<T extends Builder<T>> extends KarafConfiguration.Builder<T> {
 
 		public Builder() {
-			xms = "512m";
-			xmx = "1024m";
-			permSize = "128m";
-			maxPermSize = "256m";
-			username = "admin";
-			password = "admin";
-			logFileName = "fuse.log";
+			super();
+			xms("512m");
+			xmx("1024m");
+			permSize("128m");
+			maxPermSize("256m");
+			username("admin");
+			password("admin");
+			logFileName("fuse.log");
 		}
 
 		public FuseConfiguration build() {

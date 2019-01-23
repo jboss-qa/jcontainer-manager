@@ -15,13 +15,19 @@
  */
 package org.jboss.qa.jcontainer.fuse.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+
+import org.apache.commons.lang3.SystemUtils;
+
 import org.jboss.qa.jcontainer.fuse.FuseClient;
 import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
 import org.jboss.qa.jcontainer.fuse.FuseContainer;
 import org.jboss.qa.jcontainer.fuse.FuseUser;
 import org.jboss.qa.jcontainer.karaf.BaseKarafContainerTest;
+import org.jboss.qa.jcontainer.util.ProcessUtils;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -85,6 +91,16 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 			client.execute(GOOD_CMD);
 			Assert.assertNotNull(client.getCommandResult());
 		}
+	}
+
+	@Test
+	public void javaConfigurationXmxTest() {
+		Assume.assumeFalse("Test is not written for Windows.", SystemUtils.IS_OS_WINDOWS);
+		final String containerPid = ProcessUtils.getJavaPidByContainerId(container.getId());
+		final String result = ProcessUtils.executeCommandUnix("jcmd " + containerPid + " VM.flags");
+
+		log.debug("VM.flags {}", result);
+		Assert.assertThat(result, containsString("-XX:MaxHeapSize=2147483648"));
 	}
 }
 

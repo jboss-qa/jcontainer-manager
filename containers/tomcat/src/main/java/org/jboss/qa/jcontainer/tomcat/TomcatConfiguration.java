@@ -15,10 +15,9 @@
  */
 package org.jboss.qa.jcontainer.tomcat;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Configuration;
+import org.jboss.qa.jcontainer.JavaConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ import java.util.List;
 
 import lombok.Getter;
 
-public class TomcatConfiguration extends Configuration {
+public class TomcatConfiguration extends JavaConfiguration {
 
 	public static final String CATALINA_OPTS = "CATALINA_OPTS";
 
@@ -42,11 +41,6 @@ public class TomcatConfiguration extends Configuration {
 
 	public static Builder<?> builder() {
 		return new Builder2();
-	}
-
-	@Override
-	public String getJavaOptsEnvName() {
-		return CATALINA_OPTS;
 	}
 
 	@Override
@@ -76,14 +70,20 @@ public class TomcatConfiguration extends Configuration {
 		return httpPort;
 	}
 
-	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+	public abstract static class Builder<T extends Builder<T>> extends JavaConfiguration.Builder<T> {
 
 		protected int httpPort;
 
 		public Builder() {
-			httpPort = DEFAULT_HTTP_PORT;
-			password = "";
-			logFileName = "catalina.out";
+			super();
+			httpPort(DEFAULT_HTTP_PORT);
+			password("");
+			logFileName("catalina.out");
+		}
+
+		@Override
+		protected String javaOptsEnvName() {
+			return CATALINA_OPTS;
 		}
 
 		public T httpPort(int httpPort) {
@@ -92,21 +92,6 @@ public class TomcatConfiguration extends Configuration {
 		}
 
 		public TomcatConfiguration build() {
-			// Set CATALINA_OPTS
-			final StringBuilder catalinaOpts = new StringBuilder();
-			if (!StringUtils.isEmpty(xms)) {
-				catalinaOpts.append(" -Xms" + xms);
-			}
-			if (!StringUtils.isEmpty(xmx)) {
-				catalinaOpts.append(" -Xmx" + xmx);
-			}
-			if (!StringUtils.isEmpty(permSize)) {
-				catalinaOpts.append(" -XX:PermSize=" + permSize);
-			}
-			if (!StringUtils.isEmpty(maxPermSize)) {
-				catalinaOpts.append(" -XX:MaxPermSize=" + maxPermSize);
-			}
-			envProps.put(CATALINA_OPTS, catalinaOpts.toString());
 			envProps.put("CATALINA_HOME", directory.getAbsolutePath());
 			return new TomcatConfiguration(this);
 		}

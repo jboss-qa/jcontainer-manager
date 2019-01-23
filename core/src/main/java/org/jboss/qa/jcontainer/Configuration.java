@@ -26,17 +26,11 @@ import java.util.Set;
 
 public abstract class Configuration {
 
-	public static final String JAVA_OPTS_ENV_NAME = "JAVA_OPTS";
-
 	protected final File directory;
 	protected final String host;
 	protected final Integer port;
 	protected final String username;
 	protected final String password;
-	protected final String xms;
-	protected final String xmx;
-	protected final String permSize;
-	protected final String maxPermSize;
 	protected final String logFileName;
 	protected final Set<String> params;
 	protected final Map<String, String> envProps;
@@ -51,16 +45,8 @@ public abstract class Configuration {
 
 		// Optional properties
 		directory = builder.directory; // Mandatory for container but not for standalone client.
-		xms = builder.xms;
-		xmx = builder.xmx;
-		permSize = builder.permSize;
-		maxPermSize = builder.maxPermSize;
 		params = builder.params;
 		envProps = builder.envProps;
-	}
-
-	public String getJavaOptsEnvName() {
-		return JAVA_OPTS_ENV_NAME;
 	}
 
 	protected void checkMandatoryProperty(String name, Object value) {
@@ -87,22 +73,6 @@ public abstract class Configuration {
 		return password;
 	}
 
-	public String getXms() {
-		return xms;
-	}
-
-	public String getXmx() {
-		return xmx;
-	}
-
-	public String getPermSize() {
-		return permSize;
-	}
-
-	public String getMaxPermSize() {
-		return maxPermSize;
-	}
-
 	public String getLogFileName() {
 		return logFileName;
 	}
@@ -124,24 +94,20 @@ public abstract class Configuration {
 		protected Integer port;
 		protected String username;
 		protected String password;
-		protected String xms;
-		protected String xmx;
-		protected String permSize;
-		protected String maxPermSize;
 		protected String logFileName;
-		protected Set<String> params;
-		protected Map<String, String> envProps;
+		protected Set<String> params = new HashSet<>();
+		protected Map<String, String> envProps = new HashMap<>();
 
 		public Builder() {
-			host = "localhost";
-			port = 8080;
-			username = "admin";
-			password = "admin";
-			params = new HashSet<>();
-			envProps = new HashMap<>();
+			host("localhost");
+			port(8080);
+			username("admin");
+			password("admin");
 		}
 
 		protected abstract T self();
+
+		public abstract Configuration build();
 
 		public T directory(String directory) {
 			this.directory = new File(directory);
@@ -165,26 +131,6 @@ public abstract class Configuration {
 
 		public T password(String password) {
 			this.password = password;
-			return self();
-		}
-
-		public T xms(String xms) {
-			this.xms = xms;
-			return self();
-		}
-
-		public T xmx(String xmx) {
-			this.xmx = xmx;
-			return self();
-		}
-
-		public T permSize(String permSize) {
-			this.permSize = permSize;
-			return self();
-		}
-
-		public T maxPermSize(String maxPermSize) {
-			this.maxPermSize = maxPermSize;
 			return self();
 		}
 

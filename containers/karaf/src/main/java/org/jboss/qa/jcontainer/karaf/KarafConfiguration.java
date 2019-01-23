@@ -15,10 +15,9 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Configuration;
+import org.jboss.qa.jcontainer.JavaConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ import java.util.List;
 
 import lombok.Getter;
 
-public class KarafConfiguration extends Configuration {
+public class KarafConfiguration extends JavaConfiguration {
 
 	public static final String KARAF_OPTS_ENV_NAME = "KARAF_OPTS";
 
@@ -54,11 +53,6 @@ public class KarafConfiguration extends Configuration {
 		//Optional
 		keyFile = builder.keyFile;
 		version = builder.version;
-	}
-
-	@Override
-	public String getJavaOptsEnvName() {
-		return KARAF_OPTS_ENV_NAME;
 	}
 
 	public static Builder<?> builder() {
@@ -96,7 +90,7 @@ public class KarafConfiguration extends Configuration {
 		return sshPort;
 	}
 
-	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+	public abstract static class Builder<T extends Builder<T>> extends JavaConfiguration.Builder<T> {
 		protected int httpPort;
 		protected int sshPort;
 		protected File keyFile;
@@ -105,12 +99,18 @@ public class KarafConfiguration extends Configuration {
 		protected int version;
 
 		public Builder() {
-			httpPort = DEFAULT_HTTP_PORT;
-			sshPort = DEFAULT_SSH_PORT;
-			username = "karaf";
-			password = "karaf";
-			logFileName = "karaf.log";
-			version = DEFAULT_FUSE_VERSION;
+			super();
+			httpPort(DEFAULT_HTTP_PORT);
+			sshPort(DEFAULT_SSH_PORT);
+			username("karaf");
+			password("karaf");
+			logFileName("karaf.log");
+			version(DEFAULT_FUSE_VERSION);
+		}
+
+		@Override
+		protected String javaOptsEnvName() {
+			return KARAF_OPTS_ENV_NAME;
 		}
 
 		public T httpPort(int httpPort) {
@@ -136,18 +136,6 @@ public class KarafConfiguration extends Configuration {
 		public KarafConfiguration build() {
 			script = new File(directory, "bin/" + (SystemUtils.IS_OS_WINDOWS ? "start.bat" : "start"));
 			stopScript = new File(directory, "bin/" + (SystemUtils.IS_OS_WINDOWS ? "stop.bat" : "stop"));
-			if (!StringUtils.isEmpty(xms)) {
-				envProps.put("JAVA_MIN_MEM", xms);
-			}
-			if (!StringUtils.isEmpty(xmx)) {
-				envProps.put("JAVA_MAX_MEM", xmx);
-			}
-			if (!StringUtils.isEmpty(permSize)) {
-				envProps.put("JAVA_PERM_MEM", permSize);
-			}
-			if (!StringUtils.isEmpty(maxPermSize)) {
-				envProps.put("JAVA_MAX_PERM_MEM", maxPermSize);
-			}
 			return new KarafConfiguration(this);
 		}
 	}
