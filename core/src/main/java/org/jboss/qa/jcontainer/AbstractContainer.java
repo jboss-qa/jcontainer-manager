@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public abstract class AbstractContainer<T extends Configuration, U extends Client<T>, V extends User> implements Container<T, U, V> {
+public abstract class AbstractContainer<T extends JavaConfiguration, U extends Client<T>, V extends User> implements Container<T, U, V> {
 
 	public static final String JCONTAINER_ID = "jcontainer.id";
 	private final long id;
@@ -119,14 +119,13 @@ public abstract class AbstractContainer<T extends Configuration, U extends Clien
 		processBuilder.environment().putAll(configuration.getEnvProps());
 
 		// Modify JAVA_OPTS
-		final String javaOptsEnvName = configuration.getJavaOptsEnvName();
 		final StringBuilder javaOpts = new StringBuilder();
-		final String oldJavaOpts = processBuilder.environment().get(javaOptsEnvName);
+		final String oldJavaOpts = processBuilder.environment().get(configuration.getJavaOptsEnvName());
 		if (oldJavaOpts != null) {
 			javaOpts.append(oldJavaOpts);
 		}
 		javaOpts.append(String.format(" -D%s=%s", JCONTAINER_ID, id));
-		processBuilder.environment().put(javaOptsEnvName, javaOpts.toString());
+		processBuilder.environment().put(configuration.getJavaOptsEnvName(), javaOpts.toString());
 
 		final Process process = ProcessBuilderExecutor.asyncExecute(processBuilder, getStdoutLogFile());
 

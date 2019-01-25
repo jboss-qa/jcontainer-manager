@@ -15,21 +15,17 @@
  */
 package org.jboss.qa.jcontainer.wildfly;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
 
-import org.jboss.qa.jcontainer.Configuration;
-
-import com.google.common.base.Joiner;
+import org.jboss.qa.jcontainer.JavaConfiguration;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import lombok.Getter;
 
-public class WildflyConfiguration extends Configuration {
+public class WildflyConfiguration extends JavaConfiguration {
 
 	public static final int DEFAULT_PORT_OFFSET = 0;
 	public static final int DEFAULT_MANAGEMENT_PORT = 9990;
@@ -112,24 +108,23 @@ public class WildflyConfiguration extends Configuration {
 		}
 	}
 
-	public abstract static class Builder<T extends Builder<T>> extends Configuration.Builder<T> {
+	public abstract static class Builder<T extends Builder<T>> extends JavaConfiguration.Builder<T> {
 		protected int portOffset;
 		protected String profile;
 		protected Mode mode;
 		protected File baseDir;
 		protected File script;
 		protected String nodeName;
-		protected List<String> javaOpts;
 
 		public Builder() {
-			xms = "64m";
-			xmx = "512m";
-			maxPermSize = "256m";
-			portOffset = DEFAULT_PORT_OFFSET;
-			profile = "standalone.xml";
-			mode = Mode.STANDALONE;
-			logFileName = "server.log";
-			javaOpts = System.getenv(Configuration.JAVA_OPTS_ENV_NAME) == null ? new ArrayList<String>() : new ArrayList<>(Arrays.asList(System.getenv(Configuration.JAVA_OPTS_ENV_NAME).split("(?=\\s-)")));
+			super();
+			xms("64m");
+			xmx("512m");
+			maxPermSize("256m");
+			portOffset(DEFAULT_PORT_OFFSET);
+			profile("standalone.xml");
+			mode(Mode.STANDALONE);
+			logFileName("server.log");
 		}
 
 		public T portOffset(int portOffset) {
@@ -162,11 +157,6 @@ public class WildflyConfiguration extends Configuration {
 			return self();
 		}
 
-		public T javaOpt(String opt) {
-			javaOpts.add(opt);
-			return self();
-		}
-
 		public WildflyConfiguration build() {
 			// Set script
 			if (mode.equals(Mode.STANDALONE)) {
@@ -177,23 +167,6 @@ public class WildflyConfiguration extends Configuration {
 						+ (SystemUtils.IS_OS_WINDOWS ? "domain.bat" : "domain.sh"));
 			}
 
-			// get rid of spaces before/after option
-			for (int i = 0; i < javaOpts.size(); i++) {
-				javaOpts.set(i, javaOpts.get(i).replaceAll("\\s", ""));
-			}
-			// Set JAVA_OPTS
-			if (!StringUtils.isEmpty(xms)) {
-				replaceJavaOptIfExists("-Xms", xms);
-			}
-			if (!StringUtils.isEmpty(xmx)) {
-				replaceJavaOptIfExists("-Xmx", xmx);
-			}
-			if (!StringUtils.isEmpty(permSize)) {
-				replaceJavaOptIfExists("-XX:PermSize=", permSize);
-			}
-			if (!StringUtils.isEmpty(maxPermSize)) {
-				replaceJavaOptIfExists("-XX:MaxPermSize=", maxPermSize);
-			}
 			if (baseDir != null) {
 				replaceJavaOptIfExists("-Djboss.server.base.dir=", baseDir.toString());
 			}
@@ -205,27 +178,7 @@ public class WildflyConfiguration extends Configuration {
 			addJavaOptIfNotExists("-Djava.awt.headless=", "true");
 			addJavaOptIfNotExists("-Djboss.socket.binding.port-offset=", String.valueOf(portOffset));
 
-			envProps.put(Configuration.JAVA_OPTS_ENV_NAME, Joiner.on(" ").join(javaOpts));
-
 			return new WildflyConfiguration(this);
-		}
-
-		private void replaceJavaOptIfExists(String prefix, String value) {
-			for (int i = 0; i < javaOpts.size(); i++) {
-				if (javaOpts.get(i).startsWith(prefix)) {
-					javaOpts.remove(i);
-				}
-			}
-			javaOpts.add(prefix + value);
-		}
-
-		private void addJavaOptIfNotExists(String prefix, String value) {
-			for (int i = 0; i < javaOpts.size(); i++) {
-				if (javaOpts.get(i).startsWith(prefix)) {
-					return;
-				}
-			}
-			javaOpts.add(prefix + value);
 		}
 	}
 

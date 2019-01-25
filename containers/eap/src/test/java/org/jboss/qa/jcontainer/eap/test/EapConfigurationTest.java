@@ -21,7 +21,6 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
-import org.jboss.qa.jcontainer.Configuration;
 import org.jboss.qa.jcontainer.eap.EapConfiguration;
 
 import org.junit.Test;
@@ -46,7 +45,7 @@ public class EapConfigurationTest {
 		final String policy = "-Djboss.modules.policy-permissions=true";
 
 		final EapConfiguration conf = EapConfiguration.builder().build();
-		final List<String> options = Arrays.asList(conf.getEnvProps().get(Configuration.JAVA_OPTS_ENV_NAME).split(" "));
+		final List<String> options = Arrays.asList(conf.getEnvProps().get(EapConfiguration.JAVA_OPTS_ENV_NAME).split(" "));
 
 		assertThat(options, hasItem(equalTo("-Xms" + xms)));
 		assertThat(options, hasItem(equalTo("-Xmx" + xmx)));
@@ -64,7 +63,7 @@ public class EapConfigurationTest {
 		final EapConfiguration conf = EapConfiguration.builder()
 				.javaOpt(withSpaces)
 				.javaOpt(shouldBePresent).build();
-		final List<String> options = Arrays.asList(conf.getEnvProps().get(Configuration.JAVA_OPTS_ENV_NAME).split(" "));
+		final List<String> options = Arrays.asList(conf.getEnvProps().get(EapConfiguration.JAVA_OPTS_ENV_NAME).split(" "));
 
 		assertThat(options, hasItem(equalTo(shouldBePresent)));
 		assertThat(options, hasItem(equalTo(withSpaces.replace(" ", ""))));
@@ -79,7 +78,7 @@ public class EapConfigurationTest {
 		final EapConfiguration conf = EapConfiguration.builder()
 				.xms(xms)
 				.xmx(xmx).build();
-		final List<String> options = Arrays.asList(conf.getEnvProps().get(Configuration.JAVA_OPTS_ENV_NAME).split(" "));
+		final List<String> options = Arrays.asList(conf.getEnvProps().get(EapConfiguration.JAVA_OPTS_ENV_NAME).split(" "));
 
 		assertThat(options, hasItem(equalTo("-Xms" + xms)));
 		assertThat(options, hasItem(equalTo("-Xms" + xms)));
@@ -98,7 +97,7 @@ public class EapConfigurationTest {
 				.javaOpt(shouldOverride + false)
 				.javaOpt(pkgs)
 				.build();
-		final List<String> options = Arrays.asList(conf.getEnvProps().get(Configuration.JAVA_OPTS_ENV_NAME).split(" "));
+		final List<String> options = Arrays.asList(conf.getEnvProps().get(EapConfiguration.JAVA_OPTS_ENV_NAME).split(" "));
 
 		assertThat(options, hasItem(equalTo(shouldOverride + false)));
 		assertThat(options, hasItem(equalTo(pkgs)));

@@ -13,39 +13,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.jboss.qa.jcontainer.eap;
+package org.jboss.qa.jcontainer.configuration;
 
-import org.jboss.qa.jcontainer.wildfly.WildflyConfiguration;
+import org.jboss.qa.jcontainer.JavaConfiguration;
 
-public class EapConfiguration extends WildflyConfiguration {
+import java.util.Collections;
+import java.util.List;
 
-	public static final int DEFAULT_MANAGEMENT_PORT = 9999;
+public class DummyConfiguration extends JavaConfiguration {
 
-	public EapConfiguration(Builder<?> builder) {
+	public static final String JAVA_OPTS_ENV_NAME = "DUMMY_OPTS";
+
+	protected DummyConfiguration(Builder<?> builder) {
 		super(builder);
 	}
 
-	public int getManagementPort() {
-		return DEFAULT_MANAGEMENT_PORT + portOffset;
+	@Override
+	public int getBusyPort() {
+		return 0;
+	}
+
+	@Override
+	public List<String> generateCommand() {
+		return Collections.EMPTY_LIST;
 	}
 
 	public static Builder<?> builder() {
 		return new Builder2();
 	}
 
-	public abstract static class Builder<T extends Builder<T>> extends WildflyConfiguration.Builder<T> {
-
-		public Builder() {
-			super();
-			xms("1303m");
-			xmx("1303m");
-			maxPermSize("256m");
+	public abstract static class Builder<T extends Builder<T>> extends JavaConfiguration.Builder<T> {
+		@Override
+		protected String javaOptsEnvName() {
+			return JAVA_OPTS_ENV_NAME;
 		}
 
-		public EapConfiguration build() {
-			javaOpt("-Djboss.modules.policy-permissions=true");
-			super.build();
-			return new EapConfiguration(this);
+		@Override
+		public JavaConfiguration build() {
+			return new DummyConfiguration(this);
 		}
 	}
 
