@@ -16,7 +16,6 @@
 package org.jboss.qa.jcontainer.karaf;
 
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.commons.lang3.SystemUtils;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
@@ -62,15 +61,6 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 
 	@Override
 	public synchronized void start() throws Exception {
-		final File setEnvFile = new File(configuration.getDirectory(), "bin" + File.separator
-				+ (SystemUtils.IS_OS_WINDOWS ? "setenv.bat" : "setenv"));
-		if (setEnvFile.exists()) {
-			final File setEnvBacFile = new File(setEnvFile.getAbsolutePath() + ".backup");
-			if (setEnvFile.renameTo(setEnvBacFile)) {
-				log.info("File '{}' was renamed to '{}' to ensure the propagation of own environment properties",
-						setEnvFile.getName(), setEnvBacFile.getName());
-			}
-		}
 		if (getConfiguration().getSshPort() != KarafConfiguration.DEFAULT_SSH_PORT) {
 			setEtcProperty("sshPort", getConfiguration().getSshPort(), "org.apache.karaf.shell");
 		}
