@@ -47,17 +47,9 @@ public final class ProcessUtils {
 		}
 	}
 
-	public static void killAllJavaContainerProcesses(long id) {
-		final String pid = getJavaPidByContainerId(id);
-		log.debug("Container {} has pid {}", id, pid);
-		// get parent pid before we kill the child process
-		final String parentPid = getParentPidOfPid(pid);
-		log.debug("Container {} has parentPid {}", id, parentPid);
-		if (pid != null) {
-			kill(pid);
-		} else {
-			log.error("Java process representing container with id {} was not found", id);
-		}
+	public static void killAllJavaContainerProcesses(long id, String pid, String parentPid) {
+		log.debug("Container {} has pid {} and parentPid {}", id, pid, parentPid);
+		kill(pid);
 		// remove parent standalone.sh process of java container process which was not destroyed via process.destroy() call
 		final String ensureParentPidEapProcessCommand = String.format("ps aux | awk '$2 == \"%s\"' | grep \"standalone.sh\" | awk '{print $2}'", parentPid);
 		final String parentPidViaEapGrep = executeCommandUnix(ensureParentPidEapProcessCommand);
