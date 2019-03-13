@@ -77,9 +77,11 @@ public class WildflyContainer<T extends WildflyConfiguration, U extends WildflyC
 		}
 
 		if (SystemUtils.IS_OS_MAC) { // TODO(llowinge): remove this workaround, when figuring out why the process.destroy() is blocked (probably due some deadlock in consuming streams)
+			final String pid = ProcessUtils.getJavaPidByContainerId(getId());
+			final String parentPid = ProcessUtils.getParentPidOfPid(pid);
 			addShutdownHook(new Thread(new Runnable() {
 				public void run() {
-					ProcessUtils.killAllJavaContainerProcesses(getId());
+					ProcessUtils.killAllJavaContainerProcesses(getId(), pid, parentPid);
 				}
 			}));
 		}

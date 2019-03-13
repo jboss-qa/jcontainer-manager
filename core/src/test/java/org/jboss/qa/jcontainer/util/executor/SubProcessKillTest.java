@@ -82,6 +82,6 @@ public class SubProcessKillTest {
 		final String parentPid = ProcessUtils.getParentPidOfPid(javaPid);
 		Assert.assertTrue("Parent PID should be a number", StringUtils.isNumeric(parentPid));
 
-		ProcessUtils.killAllJavaContainerProcesses(CONTAINER_ID);
+		ProcessUtils.killAllJavaContainerProcesses(CONTAINER_ID, javaPid, parentPid);
 	}
 }
