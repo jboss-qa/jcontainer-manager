@@ -74,6 +74,8 @@ public final class ProcessUtils {
 	public static String getJavaPidByContainerId(long id) {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			return getJavaPidByContainerIdWindows(id);
+		} else if (SystemUtils.IS_OS_HP_UX) {
+			return getJavaPidByContainerIdHPUX(id);
 		} else {
 			return getJavaPidByContainerIdUnix(id);
 		}
@@ -81,6 +83,11 @@ public final class ProcessUtils {
 
 	public static String getParentPidOfPid(String pid) {
 		final String command = String.format("ps -ef | awk '$2 == \"%s\"' | awk '{print $3}'", pid);
+		return executeCommandUnix(command);
+	}
+
+	private static String getJavaPidByContainerIdHPUX(long id) {
+		final String command = String.format("ps -efx | grep \\\\-Djcontainer.id=%d | grep -v grep | grep -v \"/bin/bash\" | awk '{print $2}'", id);
 		return executeCommandUnix(command);
 	}
 
