@@ -2,7 +2,7 @@ language: java
 os:
   - linux
 jdk:
-  - oraclejdk8
+  - openjdk8
 
 before_install:
   - "[[ -f $HOME/cache/$CONTAINER_ZIP ]] || wget $URL -P $HOME/cache"
@@ -37,19 +37,6 @@ env:
     URL="http://origin-repository.jboss.org/nexus/content/groups/ea/org/jboss/fuse/jboss-fuse-full/$FUSE_VERSION/jboss-fuse-full-$FUSE_VERSION.zip"
     CONTAINER_HOME="jboss-fuse-$FUSE_VERSION"
     CONTAINER_ZIP="jboss-fuse-full-$FUSE_VERSION.zip"
-
-matrix:
-  exclude:
-    - jdk: oraclejdk7
-      env: CONTAINER=wildfly
-           URL="http://download.jboss.org/wildfly/$WILDFLY_VERSION/wildfly-$WILDFLY_VERSION.zip"
-           CONTAINER_HOME="wildfly-$WILDFLY_VERSION"
-           CONTAINER_ZIP="wildfly-$WILDFLY_VERSION.zip"
-    - jdk: oraclejdk7
-      env: CONTAINER=wildfly
-           URL="http://download.jboss.org/wildfly/$WILDFLY_11_VERSION/wildfly-$WILDFLY_11_VERSION.zip"
-           CONTAINER_ZIP="wildfly-$WILDFLY_11_VERSION"
-           CONTAINER_HOME="wildfly-$WILDFLY_11_VERSION"
 
 cache:
   directories:
