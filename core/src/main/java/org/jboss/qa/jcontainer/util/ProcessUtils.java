@@ -99,8 +99,8 @@ public final class ProcessUtils {
 	public static String executeCommandUnix(final String command) {
 		try {
 			final Process p = Runtime.getRuntime().exec(new String[] {"bash", "-c", command});
-			try (final BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
-				 final BufferedReader es = new BufferedReader(new InputStreamReader(p.getErrorStream()))
+			try (BufferedReader is = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				 BufferedReader es = new BufferedReader(new InputStreamReader(p.getErrorStream()))
 			) {
 				String result = null;
 				String line;

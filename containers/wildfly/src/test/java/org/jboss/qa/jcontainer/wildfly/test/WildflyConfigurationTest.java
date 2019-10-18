@@ -16,7 +16,6 @@
 package org.jboss.qa.jcontainer.wildfly.test;
 
 import static org.junit.Assert.assertThat;
-
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
