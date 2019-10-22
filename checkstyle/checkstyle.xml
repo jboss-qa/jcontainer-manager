@@ -44,10 +44,10 @@
 		<property name="tabWidth" value="4"/> <!-- Default tab size for java files -->
 
 		<!-- Internal check extensions -->
-		<module name="org.jboss.soa.qa.checkstyle.checks.ArrayInitialisationSpaces"/>
-		<module name="org.jboss.soa.qa.checkstyle.checks.BlankLineBeforeBlockEnd"/>
-		<module name="org.jboss.soa.qa.checkstyle.checks.BlankLines"/>
-		<module name="org.jboss.soa.qa.checkstyle.checks.Whitespace">
+		<module name="org.jboss.soa.qa.checkstyle.checks.ArrayInitialisationSpacesCheck"/>
+		<module name="org.jboss.soa.qa.checkstyle.checks.BlankLineBeforeBlockEndCheck"/>
+		<module name="org.jboss.soa.qa.checkstyle.checks.BlankLinesCheck"/>
+		<module name="org.jboss.soa.qa.checkstyle.checks.WhitespaceCheck">
 			<property name="checkMultipleSpaces" value="true"/>
 		</module>
 

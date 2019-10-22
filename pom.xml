@@ -136,7 +136,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
-				<version>2.17</version>
+				<version>3.1.0</version>
 				<configuration>
 					<configLocation>checkstyle/checkstyle.xml</configLocation>
 					<consoleOutput>true</consoleOutput>
@@ -147,12 +147,12 @@
 					<dependency>
 						<groupId>com.puppycrawl.tools</groupId>
 						<artifactId>checkstyle</artifactId>
-						<version>6.17</version>
+						<version>8.18</version>
 					</dependency>
 					<dependency>
 						<groupId>org.jboss.soa.qa</groupId>
 						<artifactId>checkstyle-extension</artifactId>
-						<version>1.0.0</version>
+						<version>1.1.0</version>
 					</dependency>
 					<dependency>
 						<groupId>org.slf4j</groupId>
