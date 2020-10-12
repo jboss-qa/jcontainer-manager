@@ -45,7 +45,7 @@
 		<version.lombok>1.16.8</version.lombok>
 		<version.slf4j>1.7.21</version.slf4j>
 		<version.sshd>0.12.0</version.sshd>
-		<version.junit>4.12</version.junit>
+		<version.junit>4.13.1</version.junit>
 		<version.apache.commons>3.3.2</version.apache.commons>
 		<version.apache.commons.configuration>1.10</version.apache.commons.configuration>
 		<version.apache.commons.codec>1.10</version.apache.commons.codec>
