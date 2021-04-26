@@ -49,7 +49,7 @@
 		<version.apache.commons>3.3.2</version.apache.commons>
 		<version.apache.commons.configuration>1.10</version.apache.commons.configuration>
 		<version.apache.commons.codec>1.10</version.apache.commons.codec>
-		<version.apache.commons.io>2.1</version.apache.commons.io>
+		<version.apache.commons.io>2.7</version.apache.commons.io>
 		<version.surefire>2.19.1</version.surefire>
 	</properties>
 	<dependencies>
