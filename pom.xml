@@ -188,6 +188,10 @@
 							<name>fuse.home</name>
 							<value>${fuse.home}</value>
 						</property>
+						<property>
+							<name>jdg.home</name>
+							<value>${jdg.home}</value>
+						</property>
 					</systemProperties>
 				</configuration>
 			</plugin>
