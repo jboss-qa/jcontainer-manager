@@ -36,6 +36,12 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<developers>
+		<developer>
+			<name>jboss-qa</name>
+		</developer>
+	</developers>
+
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -207,16 +213,23 @@
 
 	<pluginRepositories>
 		<pluginRepository>
-			<id>jboss-soa-qa-maven-repository</id>
-			<url>http://dl.bintray.com/jboss-soa-qa/maven/</url>
+			<id>jboss-releases-repository</id>
+			<name>JBoss Releases Repository</name>
+			<url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2</url>
 		</pluginRepository>
 	</pluginRepositories>
 
 	<distributionManagement>
 		<repository>
-			<id>bintray-jboss-soa-qa-maven-jcontainer-manager</id>
-			<name>jboss-soa-qa-maven-jcontainer-manager</name>
-			<url>https://api.bintray.com/maven/jboss-soa-qa/maven/jcontainer-manager</url>
+			<id>jboss-releases-repository</id>
+			<name>JBoss Releases Repository</name>
+			<url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2</url>
 		</repository>
+		<snapshotRepository>
+			<id>jboss-snapshots-repository</id>
+			<name>JBoss Snapshots Repository</name>
+			<url>https://repository.jboss.org/nexus/content/repositories/snapshots</url>
+		</snapshotRepository>
 	</distributionManagement>
+	
 </project>
