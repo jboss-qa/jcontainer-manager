@@ -102,5 +102,21 @@ public class BaseFuseContainerTest extends BaseKarafContainerTest {
 		log.debug("VM.flags {}", result);
 		Assert.assertThat(result, containsString("-XX:MaxHeapSize=2147483648"));
 	}
+
+	@Test
+	public void java17Test() {
+		Assume.assumeTrue("Test is for java 17 on only.", Boolean.parseBoolean(System.getProperty("version.from.jdk17", "false")));
+		final FuseConfiguration config = FuseConfiguration.builder().build();
+		Assert.assertNull("-XX:PermSize is not null", config.getPermSize());
+		Assert.assertNull("-XX:MaxPermSize is not null", config.getMaxPermSize());
+	}
+
+	@Test
+	public void beforeJava17Test() {
+		Assume.assumeFalse("Test is for java before version 17.", Boolean.parseBoolean(System.getProperty("version.from.jdk17", "false")));
+		final FuseConfiguration config = FuseConfiguration.builder().build();
+		Assert.assertNotNull("-XX:PermSize is null", config.getPermSize());
+		Assert.assertNotNull("-XX:MaxPermSize is null", config.getMaxPermSize());
+	}
 }
 
