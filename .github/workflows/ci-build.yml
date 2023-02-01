@@ -1,0 +1,45 @@
+name: Integration Tests
+on:
+  push:
+    branches:
+      - "master"
+      - "developer"
+  pull_request:
+
+# This allows a subsequently queued workflow run to interrupt previous runs
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        container: [karaf, wildfly, fuse, tomcat]
+    runs-on: ${{ matrix.os }}
+    environment: ${{ matrix.container }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          distribution: 'adopt'
+          cache: maven
+      - name: Compile project
+        run: |
+          mvn -B install
+      - name: Download application container
+        run: |
+          curl ${{ vars.CONTAINER_URL }} --output container.zip
+      - name: Extract application container
+        run: |
+          unzip -qq container.zip
+      - name: Set-up tomcat
+        if: matrix.container == 'tomcat'
+        run: chmod +x ${{ github.workspace }}/${{ vars.CONTAINER_HOME}}/bin/*.sh
+      - name: Execute ${{ matrix.container }} tests
+        run: |
+          mvn -B test -DskipTests=false -D${{ matrix.container }}.home=${{ github.workspace }}/${{ vars.CONTAINER_HOME }} -pl :${{ matrix.container }}
