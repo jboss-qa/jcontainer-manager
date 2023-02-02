@@ -39,7 +39,10 @@ public class EapConfiguration extends WildflyConfiguration {
 			super();
 			xms("1303m");
 			xmx("1303m");
-			maxPermSize("256m");
+			//-XX:MaxPermSize has been removed from jdk17
+			if (Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) < 17) {
+				maxPermSize("256m");
+			}
 		}
 
 		public EapConfiguration build() {
