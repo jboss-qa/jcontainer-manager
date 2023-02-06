@@ -9,8 +9,8 @@
 	<artifactId>karaf</artifactId>
 	<name>JContainer Manager :: Containers :: Apache Karaf</name>
 	<properties>
-		<version.osgi>5.0.0</version.osgi>
-		<version.karaf>4.0.0.M1</version.karaf>
+		<version.osgi>8.0.0</version.osgi>
+		<version.karaf>4.4.3</version.karaf>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -21,7 +21,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.core</artifactId>
+			<artifactId>osgi.core</artifactId>
 			<version>${version.osgi}</version>
 		</dependency>
 		<dependency>

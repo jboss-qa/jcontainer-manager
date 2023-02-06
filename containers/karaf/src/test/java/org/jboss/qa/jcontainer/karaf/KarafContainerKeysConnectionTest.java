@@ -15,8 +15,6 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
-import org.apache.commons.configuration.PropertiesConfiguration;
-
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -24,17 +22,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.File;
-
 @RunWith(JUnit4.class)
-public class KarafContainerPortTest extends BaseKarafContainerTest {
-
-	protected static final int SSH_PORT = 8102;
+public class KarafContainerKeysConnectionTest extends BaseKarafContainerTest {
 
 	@BeforeClass
 	public static void beforeClass() throws Exception {
-		setContainerConfigruation(KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g")
-				.sshPort(SSH_PORT).build());
+		setContainerConfigruation(KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g").build());
+		container.setupClientKeys();
 		container.start();
 	}
 
@@ -42,19 +36,13 @@ public class KarafContainerPortTest extends BaseKarafContainerTest {
 	public static void afterClass() throws Exception {
 		if (container != null) {
 			container.stop();
-			final File propsFile = container.getConfigFile("org.apache.karaf.shell");
-			final PropertiesConfiguration propConf = new PropertiesConfiguration(propsFile);
-			propConf.setProperty("sshPort", KarafConfiguration.DEFAULT_SSH_PORT);
-			propConf.save();
 		}
 	}
 
 	@Test
-	public void standaloneClientTest() throws Exception {
-		try (KarafClient client = new KarafClient<>(KarafConfiguration.builder().sshPort(SSH_PORT).build())) {
-			client.execute(GOOD_CMD);
-			Assert.assertNotNull(client.getCommandResult());
-		}
+	public void clientTest() throws Exception {
+		Assert.assertNotNull("Private client key must be not null", ((KarafConfiguration) container.getConfiguration()).getKeyFile());
+		container.checkClient();
 	}
 }
 

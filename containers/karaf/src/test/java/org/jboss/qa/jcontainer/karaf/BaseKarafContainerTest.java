@@ -29,6 +29,8 @@ import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +40,25 @@ public class BaseKarafContainerTest extends KarafContainerTest {
 
 	protected static KarafContainer container;
 
-	@BeforeClass
-	public static void beforeClass() throws Exception {
-		final KarafConfiguration conf = KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g").build();
+	protected static void setContainerConfigruation(KarafConfiguration conf) throws Exception {
 		container = new KarafContainer<>(conf);
+		//add user and group
+		final KarafUser admingroup = new KarafUser();
+		admingroup.setUsername(conf.getUsername());
+		admingroup.setPassword(conf.getPassword());
+		admingroup.addGroups("admingroup");
+		admingroup.setRoles(Arrays.asList("group", "admin", "manager", "viewer", "systembundles", "ssh"));
+		container.addUser(admingroup);
 		final KarafUser user = new KarafUser();
 		user.setUsername(conf.getUsername());
 		user.setPassword(conf.getPassword());
-		user.addRoles("admin", "SuperUser");
+		user.setGroups(Collections.singletonList("admingroup"));
 		container.addUser(user);
+	}
+
+	@BeforeClass
+	public static void beforeClass() throws Exception {
+		setContainerConfigruation(KarafConfiguration.builder().directory(KARAF_HOME).xmx("2g").build());
 		container.start();
 	}
 

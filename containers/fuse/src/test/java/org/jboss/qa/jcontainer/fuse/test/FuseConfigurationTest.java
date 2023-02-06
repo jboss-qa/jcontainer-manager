@@ -19,8 +19,11 @@ import static org.junit.Assert.assertThat;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 
+import org.jboss.qa.jcontainer.JavaConfiguration;
 import org.jboss.qa.jcontainer.fuse.FuseConfiguration;
 
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -46,7 +49,25 @@ public class FuseConfigurationTest {
 
 		assertThat(options, hasItem(equalTo("-Xms" + xms)));
 		assertThat(options, hasItem(equalTo("-Xmx" + xmx)));
-		assertThat(options, hasItem(equalTo("-XX:PermSize=" + permSize)));
-		assertThat(options, hasItem(equalTo("-XX:MaxPermSize=" + maxPermSize)));
+		if (JavaConfiguration.BEFORE_JDK17) {
+			assertThat(options, hasItem(equalTo("-XX:PermSize=" + permSize)));
+			assertThat(options, hasItem(equalTo("-XX:MaxPermSize=" + maxPermSize)));
+		}
+	}
+
+	@Test
+	public void java17Test() {
+		Assume.assumeFalse("Test is for java 17 on only.", JavaConfiguration.BEFORE_JDK17);
+		final FuseConfiguration config = FuseConfiguration.builder().build();
+		Assert.assertNull("-XX:PermSize is not null", config.getPermSize());
+		Assert.assertNull("-XX:MaxPermSize is not null", config.getMaxPermSize());
+	}
+
+	@Test
+	public void beforeJava17Test() {
+		Assume.assumeTrue("Test is for java before version 17.", JavaConfiguration.BEFORE_JDK17);
+		final FuseConfiguration config = FuseConfiguration.builder().build();
+		Assert.assertNotNull("-XX:PermSize is null", config.getPermSize());
+		Assert.assertNotNull("-XX:MaxPermSize is null", config.getMaxPermSize());
 	}
 }

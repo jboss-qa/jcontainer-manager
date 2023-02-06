@@ -33,11 +33,8 @@ public class FuseConfiguration extends KarafConfiguration {
 			super();
 			xms("512m");
 			xmx("1024m");
-			//-XX:MaxPermSize and -XX:PermSize have been removed from jdk17
-			if (Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) < 17) {
-				permSize("128m");
-				maxPermSize("256m");
-			}
+			permSize("128m");
+			maxPermSize("256m");
 			username("admin");
 			password("admin");
 			logFileName("fuse.log");
