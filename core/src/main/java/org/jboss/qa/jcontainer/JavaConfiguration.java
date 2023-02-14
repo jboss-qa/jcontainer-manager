@@ -24,6 +24,8 @@ import java.util.List;
 
 public abstract class JavaConfiguration extends Configuration {
 
+	public static final boolean BEFORE_JDK17 = Integer.parseInt(System.getProperty("java.version").split("\\.")[0]) < 17;
+
 	public static final String JAVA_OPTS_ENV_NAME = "JAVA_OPTS";
 
 	protected final String xms;
@@ -115,20 +117,22 @@ public abstract class JavaConfiguration extends Configuration {
 
 		public T permSize(String permSize) {
 			this.permSize = permSize;
-			if (!StringUtils.isEmpty(permSize)) {
+			if (!StringUtils.isEmpty(permSize) && BEFORE_JDK17) {
 				replaceJavaOptIfExists("-XX:PermSize=", permSize);
 			} else {
 				removeJavaOptIfExists("-XX:PermSize=");
+				this.permSize = null;
 			}
 			return self();
 		}
 
 		public T maxPermSize(String maxPermSize) {
 			this.maxPermSize = maxPermSize;
-			if (!StringUtils.isEmpty(maxPermSize)) {
+			if (!StringUtils.isEmpty(maxPermSize) && BEFORE_JDK17) {
 				replaceJavaOptIfExists("-XX:MaxPermSize=", maxPermSize);
 			} else {
 				removeJavaOptIfExists("-XX:MaxPermSize=");
+				this.maxPermSize = null;
 			}
 			return self();
 		}

@@ -27,6 +27,7 @@ import static org.hamcrest.CoreMatchers.not;
 import org.jboss.qa.jcontainer.JavaConfiguration;
 
 import org.junit.After;
+import org.junit.Assume;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -82,6 +83,7 @@ public class JavaConfigurationTest {
 
 	@Test
 	public void replaceInJavaOpts() throws Exception {
+		Assume.assumeTrue("Test is for java before version 17.", JavaConfiguration.BEFORE_JDK17);
 		final Map<String, String> env = new HashMap<>();
 		env.putAll(System.getenv());
 		env.put(JAVA_OPTS_ENV_NAME, "-XX:PermSize=100M");
@@ -111,7 +113,7 @@ public class JavaConfigurationTest {
 				.maxPermSize("")
 				.build();
 
-		assertEquals("", cfg.getMaxPermSize());
+		assertEquals(null, cfg.getMaxPermSize());
 		assertEquals(JAVA_OPTS_ENV_NAME, cfg.getJavaOptsEnvName());
 		assertThat(cfg.getEnvProps().keySet(), hasItem(JAVA_OPTS_ENV_NAME));
 		assertThat(cfg.getEnvProps().get(cfg.getJavaOptsEnvName()), not(containsString("-XX:MaxPermSize")));

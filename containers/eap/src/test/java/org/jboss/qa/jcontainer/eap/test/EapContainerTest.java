@@ -21,8 +21,6 @@ import org.jboss.qa.jcontainer.eap.EapContainer;
 import org.jboss.qa.jcontainer.eap.EapUser;
 import org.jboss.qa.jcontainer.wildfly.test.WildflyContainerTest;
 
-import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,19 +54,5 @@ public class EapContainerTest extends WildflyContainerTest {
 			client.execute(GOOD_CMD);
 			client.getCommandResult().assertSuccess();
 		}
-	}
-
-	@Test
-	public void java17Test() {
-		Assume.assumeTrue("Test is for java 17 on only.", Boolean.parseBoolean(System.getProperty("version.from.jdk17", "false")));
-		final EapConfiguration config = EapConfiguration.builder().build();
-		Assert.assertNull("-XX:MaxPermSize is not null", config.getMaxPermSize());
-	}
-
-	@Test
-	public void beforeJava17Test() {
-		Assume.assumeFalse("Test is for java before version 17.", Boolean.parseBoolean(System.getProperty("version.from.jdk17", "false")));
-		final EapConfiguration config = EapConfiguration.builder().build();
-		Assert.assertNotNull("-XX:MaxPermSize is null", config.getMaxPermSize());
 	}
 }

@@ -20,8 +20,11 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 
+import org.jboss.qa.jcontainer.JavaConfiguration;
 import org.jboss.qa.jcontainer.wildfly.WildflyConfiguration;
 
+import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -102,5 +105,19 @@ public class WildflyConfigurationTest {
 		//not contain defaults
 		assertThat(options, not(hasItem(equalTo(shouldOverride + true))));
 		assertThat(options, not(hasItem(equalTo("-Djboss.modules.system.pkgs=org.jboss.byteman"))));
+	}
+
+	@Test
+	public void java17Test() {
+		Assume.assumeFalse("Test is for java 17 on only.", JavaConfiguration.BEFORE_JDK17);
+		final WildflyConfiguration config = WildflyConfiguration.builder().build();
+		Assert.assertNull("-XX:MaxPermSize is not null", config.getMaxPermSize());
+	}
+
+	@Test
+	public void beforeJava17Test() {
+		Assume.assumeTrue("Test is for java before version 17.", JavaConfiguration.BEFORE_JDK17);
+		final WildflyConfiguration config = WildflyConfiguration.builder().build();
+		Assert.assertNotNull("-XX:MaxPermSize is null", config.getMaxPermSize());
 	}
 }

@@ -121,6 +121,10 @@ public class WildflyConfiguration extends JavaConfiguration {
 			xms("64m");
 			xmx("512m");
 			maxPermSize("256m");
+			//needed in jdk17
+			if (!JavaConfiguration.BEFORE_JDK17) {
+				javaOpt("--add-opens java.xml/com.sun.org.apache.xerces.internal.jaxp=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.security=ALL-UNNAMED");
+			}
 			portOffset(DEFAULT_PORT_OFFSET);
 			profile("standalone.xml");
 			mode(Mode.STANDALONE);

@@ -38,7 +38,7 @@ public class KarafConfiguration extends JavaConfiguration {
 	@Getter
 	protected final int sshPort;
 	@Getter
-	protected final File keyFile;
+	protected File keyFile;
 	protected final File script;
 	protected final File stopScript;
 	@Getter
@@ -90,6 +90,10 @@ public class KarafConfiguration extends JavaConfiguration {
 		return sshPort;
 	}
 
+	public void setKeyFile(File keyFile) {
+		this.keyFile = keyFile;
+	}
+
 	public abstract static class Builder<T extends Builder<T>> extends JavaConfiguration.Builder<T> {
 		protected int httpPort;
 		protected int sshPort;
@@ -106,6 +110,10 @@ public class KarafConfiguration extends JavaConfiguration {
 			password("karaf");
 			logFileName("karaf.log");
 			version(DEFAULT_FUSE_VERSION);
+			//needed in jdk17
+			if (!JavaConfiguration.BEFORE_JDK17) {
+				javaOpt("--add-opens java.base/java.lang=ALL-UNNAMED");
+			}
 		}
 
 		@Override

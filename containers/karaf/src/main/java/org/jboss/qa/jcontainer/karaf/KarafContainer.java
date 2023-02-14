@@ -15,7 +15,9 @@
  */
 package org.jboss.qa.jcontainer.karaf;
 
+import org.apache.commons.configuration.AbstractFileConfiguration;
 import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.io.FileUtils;
 import org.apache.karaf.jaas.modules.BackingEngine;
 import org.apache.karaf.jaas.modules.properties.PropertiesBackingEngineFactory;
 
@@ -24,6 +26,11 @@ import org.jboss.qa.jcontainer.karaf.utils.CoreUtils;
 import org.jboss.qa.jcontainer.util.executor.ProcessBuilderExecutor;
 
 import java.io.File;
+import java.nio.file.Paths;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPublicKey;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,6 +39,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<T>, V extends KarafUser>
 		extends AbstractContainer<T, U, V> {
+
+	private static final String CLIENT_KEY_FILE = "client.key";
+	private static final String SSH_GROUP = "_g_:admingroup";
+	private static final String KEYS_PROPERTIES = "keys.properties";
 
 	public KarafContainer(T configuration) {
 		super(configuration);
@@ -44,11 +55,14 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 		options.put("users", usersFile.getAbsolutePath());
 		final BackingEngine engine = new PropertiesBackingEngineFactory().build(options);
 		engine.addUser(user.getUsername(), user.getPassword());
-		for (String role : user.getRoles()) {
-			engine.addRole(user.getUsername(), role);
-		}
 		for (String group : user.getGroups()) {
 			engine.addGroup(user.getUsername(), group);
+			for (String role : user.getRoles()) {
+				engine.addGroupRole(group, role);
+			}
+		}
+		for (String role : user.getRoles()) {
+			engine.addRole(user.getUsername(), role);
 		}
 	}
 
@@ -78,6 +92,44 @@ public class KarafContainer<T extends KarafConfiguration, U extends KarafClient<
 				}
 			}
 		}));
+	}
+
+	/**
+	 * If configuration.getKeyFile() is set with a path, this file will be used as client private key,
+	 * otherwise a new file client.key in etc folder will be generated and the public key is configured accordingly.
+	 * @throws Exception
+	 */
+	public void setupClientKeys() throws Exception {
+		File keyFile = configuration.getKeyFile();
+		if (keyFile == null) {
+			keyFile = Paths.get(configuration.getDirectory().getAbsolutePath(),
+					"etc", CLIENT_KEY_FILE).toAbsolutePath().toFile();
+			configuration.setKeyFile(keyFile);
+		}
+		if (!keyFile.exists()) {
+			final File keyProps = this.getConfigFile(KEYS_PROPERTIES);
+			final KeyPairGenerator keygen = KeyPairGenerator.getInstance("RSA");
+			keygen.initialize(2048);
+			final KeyPair kp = keygen.generateKeyPair();
+			final RSAPublicKey publicKey = (RSAPublicKey) kp.getPublic();
+			final AbstractFileConfiguration conf = new PropertiesConfiguration(keyProps);
+			final String publicKeyPropValue = Base64.getEncoder().encodeToString(publicKey.getEncoded()) + "," + SSH_GROUP;
+			if (conf.containsKey(configuration.getUsername())) {
+				//backup it
+				FileUtils.copyFile(keyProps, new File(keyProps.getAbsoluteFile() + "." + String.valueOf(System.currentTimeMillis())));
+				conf.setProperty(configuration.getUsername(), publicKeyPropValue);
+			} else {
+				conf.addProperty(configuration.getUsername(), publicKeyPropValue);
+			}
+			//update key.properties
+			conf.save();
+			//write private key
+			final StringBuilder result = new StringBuilder();
+			result.append("-----BEGIN OPENSSH PRIVATE KEY-----\n");
+			result.append(Base64.getEncoder().encodeToString(kp.getPrivate().getEncoded()));
+			result.append("\n-----END OPENSSH PRIVATE KEY-----\n");
+			FileUtils.write(keyFile, result.toString());
+		}
 	}
 
 	public File getConfigFile(String name) {
