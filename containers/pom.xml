@@ -16,6 +16,7 @@
 		<module>wildfly</module>
 		<module>eap</module>
 		<module>tomcat</module>
+		<module>jdg</module>
 	</modules>
 	<dependencies>
 		<dependency>
